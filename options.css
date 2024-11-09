@@ -1,0 +1,87 @@
+body {
+    background-color: #121212; /* Темный фон */
+    color: #ffffff; /* Белый текст */
+}
+
+/* Стили для input-полей */
+input {
+    width: 80%;
+    flex: 1;
+    padding: 10px;
+    background-color: #1E1E1E; /* Темный фон для полей ввода */
+    color: #ffffff; /* Белый текст для полей ввода */
+    border: 1px solid #333333; /* Светло-серая граница для полей */
+    border-radius: 4px; /* Скругление углов */
+}
+
+/* Стили для меток */
+label {
+    padding-right: 8px;
+    display: inline-block;
+    min-width: 80px;
+    text-align: right;
+    vertical-align: middle;
+    color: #DDDDDD; /* Светло-серый цвет текста для лейблов */
+}
+
+/* Стили для параграфов */
+p {
+    display: flex;
+}
+
+/* Стили для строк таблицы */
+.row {
+    width: 100%;
+    display: table-row;
+    background-color: #1A1A1A; /* Слегка отличающийся темный фон для строк */
+}
+
+/* Стили для выравнивания по центру */
+.centered {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Стили для ячеек таблицы */
+.cell {
+    display: table-cell;
+    padding: 10px; /* Отступы внутри ячеек */
+    border-bottom: 1px solid #333333; /* Граница между ячейками */
+}
+
+/* Стили для блока с опциями */
+.options {
+    width: 100%;
+    padding: 10px;
+    background-color: #1E1E1E; /* Темный фон для блока с опциями */
+    border-radius: 4px; /* Скругление углов блока */
+}
+/* Общий стиль для кнопок */
+button {
+    padding: 10px 20px; /* Отступы внутри кнопки */
+    background-color: #282828; /* Темный фон для кнопок */
+    color: #ffffff; /* Белый текст */
+    border: none; /* Без границ */
+    border-radius: 5px; /* Скругленные углы */
+    cursor: pointer; /* Стиль курсора */
+    transition: background-color 0.3s, color 0.3s; /* Плавный переход цвета */
+}
+
+/* Стиль для кнопки при наведении */
+button:hover {
+    background-color: #3A3A3A; /* Чуть более светлый фон при наведении */
+}
+
+/* Стиль для активной кнопки */
+button:active {
+    background-color: #1E1E1E; /* Темный фон при нажатии */
+}
+
+/* Стиль для отключенной (disabled) кнопки */
+button:disabled {
+    background-color: #3A3A3A; /* Серый фон для неактивной кнопки */
+    color: #777777; /* Светло-серый текст */
+    cursor: default; /* Стандартный курсор */
+}
+

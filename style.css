@@ -1,0 +1,48 @@
+body {
+    background-color: #121212; /* Темный фон */
+    color: #ffffff; /* Белый текст */
+}
+
+/* Ссылки */
+a {
+    color: #1E90FF; /* Светло-голубой цвет для ссылок */
+    cursor: pointer;
+}
+
+/* Заголовки H1 */
+h1 {
+    font-size: 32px;
+    display: inline-block;
+    color: #FFD700; /* Желтый цвет для заголовков H1 */
+}
+
+/* Адаптивный размер для H1 на больших экранах */
+@media screen and (min-width: 400px) {
+    h1 {
+        font-size: 48px;
+    }
+}
+
+/* Заголовки H2 */
+h2 {
+    display: inline-block;
+    color: #00FF00; /* Зеленый цвет для заголовков H2 */
+}
+
+/* Изображения */
+img {
+    height: 72px;
+    border: 1px solid #ffffff; /* Белая рамка вокруг изображений */
+}
+
+/* Блок с информацией об авторских правах */
+.giveback {
+    font-size: 14px;
+    font-style: italic;
+    color: #AAAAAA; /* Серый цвет текста */
+}
+
+.giveback a {
+    color: #AAAAAA; /* Серый цвет для ссылок в блоке авторских прав */
+    text-decoration: underline;
+}
