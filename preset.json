@@ -1,7 +1,7 @@
 {
   "blockpage": "",
   "limit": 160,
-  "whitelist": "mozilla.org|dansguardian.org|stepik.org|netology.ru",
+  "whitelist": "mozilla.org|dansguardian.org|stepik.org|netology.ru|github.com",
   "blockvals": [
     {
       "name": 2,

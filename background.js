@@ -72,8 +72,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const url = sender.tab.url;
         console.log("Current URL:", url);
 		console.log(request.pageText)
-
-        if (cache.has(url)) {
+		if (settings.whitelist.split('|').includes(getDomain(sender.tab.url)) ){
+			sendResponse({ status: "success" })
+		} else if (cache.has(url)) {
           // Если URL уже есть в кэше, используем закэшированный результат
           const cachedResult = cache.get(url);
           console.log("Using cached result:", cachedResult);
