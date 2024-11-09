@@ -73,6 +73,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("Current URL:", url);
 		console.log(request.pageText)
 		if (settings.whitelist.split('|').includes(getDomain(sender.tab.url)) ){
+			console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url) )
+			console.log(settings.whitelist)
 			sendResponse({ status: "success" })
 		} else if (cache.has(url)) {
           // Если URL уже есть в кэше, используем закэшированный результат
