@@ -1,48 +1,10 @@
-console.log("content_start.js и блокировка видео запущены");
-
-var flaggedVideos = new Set();
-
-function killVideo(video) {
-	video.innerHTML = '';
-
-	if(video.hasAttribute("src")) {
-		video.removeAttribute("src");
-		video.load();
-	}
-}
-
-function nomovdo(element) {
-	document.querySelectorAll("video").forEach(function(video) {
-		if(flaggedVideos.has(video)) { return; }
-
-		flaggedVideos.add(video);
-
-		killVideo(video);
-
-		video.addEventListener("loadstart", function() {
-			killVideo(video);
-		});
-	});
-	//console.log("nomovdo завершил свою работу")
-}
-
-function beginNomovdo() {
-	var observer = new MutationObserver(nomovdo);
-	observer.observe(document, {childList: true, subtree: true});
-
-	document.addEventListener("DOMContentLoaded", nomovdo);
-
-	nomovdo();
-}
-
-
-chrome.runtime.sendMessage({message: "checkWhitelistStatus"}, function(response) {
-	console.log(response)
-	if(response.status === "blockingVideo" ){
-		console.log("Блокировка видео началась, сайт не в белом списке")
-		beginNomovdo();
-	} else {
-		console.log("Сайт в белом списке, блокировки видео не будет")
-	}
+// content_start.js
+console.log("content_start запущен")
+const observer = new MutationObserver(mutations => {
+    if (document.body) {
+        document.body.classList.add('page-hidden');
+        observer.disconnect(); // Останавливаем наблюдение после добавления класса
+    }
 });
 
+observer.observe(document.documentElement, { childList: true });

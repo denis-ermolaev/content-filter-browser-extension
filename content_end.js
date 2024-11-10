@@ -37,6 +37,8 @@ chrome.runtime.sendMessage(
       // После завершения обработки показываем содержимое страницы
       document.body.style.visibility = 'visible';
 	  document.body.style.display = 'block';
+	  
+	  document.body.classList.remove('page-hidden');
       console.log('Содержимое страницы показано');
     }
   }

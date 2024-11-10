@@ -1,4 +1,4 @@
-/* content.css */
-body {
-  display: none;
+/* content_start.css */
+body.page-hidden {
+display: none;
 }
