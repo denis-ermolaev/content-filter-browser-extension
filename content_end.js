@@ -12,8 +12,9 @@ console.log('DOM полностью загружен и разобран');
 let bodyClone = document.body.cloneNode(true);
 
 // Убираем скрытие на копии
-bodyClone.style.visibility = 'visible';
-bodyClone.style.display = 'block';
+//bodyClone.style.visibility = 'visible';
+//bodyClone.style.display = 'block';
+bodyClone.classList.remove('page-hidden');
 
 // Добавляем копию к документу, чтобы можно было извлечь текст
 document.documentElement.appendChild(bodyClone);
@@ -35,8 +36,8 @@ chrome.runtime.sendMessage(
       console.log("Page text sent successfully");
 
       // После завершения обработки показываем содержимое страницы
-      document.body.style.visibility = 'visible';
-	  document.body.style.display = 'block';
+      //document.body.style.visibility = 'visible';
+	  //document.body.style.display = 'block';
 	  
 	  document.body.classList.remove('page-hidden');
       console.log('Содержимое страницы показано');
