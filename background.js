@@ -83,7 +83,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru'].includes(cachedResult.language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-              sendResponse({ status: "blocked", score: cachedResult.score });
+				chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score,language:cachedResult.language,foundWords:'' }, () => {
+				   sendResponse({ status: "blocked", score: cachedResult.score });
+			    });
             });
           } else {
             sendResponse({ status: "success", score: cachedResult.score });
@@ -109,23 +111,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
 
           const [result_scan, language] = await Promise.all([scan_Promise, languagePromise]);
-		  let scrore = result_scan[0]
+		  let score = result_scan[0]
 		  let foundWords = result_scan[1]
-          console.log("Scan complete. Score:", scrore);
+          console.log("Scan complete. Score:", score);
 		  console.log("Scan complete. foundWords:", foundWords);
           console.log("Language detected:", language);
 
           // Сохраняем результат в кэш
           console.log("Saving result to cache...");
-          cache.set(url, { scrore, language });
+          cache.set(url, { score, language });
 
           // Проверяем, превышает ли score лимит или язык не английский и не русский
-          if (scrore > settings.limit || (language && !['en', 'ru'].includes(language))) {
+          if (score > settings.limit || (language && !['en', 'ru'].includes(language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-              sendResponse({ status: "blocked", scrore, language });
+              chrome.storage.local.set({ status: "blocked_by_scan", score, language,foundWords }, () => {
+				sendResponse({ status: "blocked", score, language });
+			  });
             });
           } else {
-            sendResponse({ status: "success", scrore, language });
+            sendResponse({ status: "success", score, language });
           }
         }
       }else if (request.message === "checkWhitelistStatus"){

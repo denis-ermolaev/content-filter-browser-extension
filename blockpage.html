@@ -15,10 +15,21 @@
       allow this domain in <a id="showOptions">the settings</a> (see
       <em>whitelist</em>).
     </p>
-    <details>
-      <summary>sensitive phrases <span id="score"/></summary>
-      <p id="phrases"/>
-    </details>
+    
+    <!-- Добавляем элементы для отображения данных -->
+    <div>
+      <strong>Status:</strong> <span id="status"></span><br>
+      <strong>Score:</strong> <span id="score"></span><br>
+      <strong>Language:</strong> <span id="language"></span><br>
+    </div>
+
+	<details>
+	<summary>sensitive phrases <span id="sensitivePhrases"></span></summary>
+	<p id="phrases"></p>
+	<p><strong>Found Words:</strong></p>
+	<div id="foundWordsContainer"></div> <!-- Контейнер для найденных слов -->
+	</details>
+    
     <script src="blockpage.js"></script>
   </body>
 </html>
