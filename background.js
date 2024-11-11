@@ -81,7 +81,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const cachedResult = cache.get(url);
           console.log("Using cached result:", cachedResult);
 
-          if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru'].includes(cachedResult.language))) {
+          if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru','unknown'].includes(cachedResult.language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
 				chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score,language:cachedResult.language,foundWords:'' }, () => {
 				   sendResponse({ status: "blocked", score: cachedResult.score });
@@ -109,7 +109,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
               });
             });
-          }
+          } else {
+				console.log("Too few words to detect language.");
+				languagePromise = Promise.resolve({ languages: [{ language: "unknown", percentage: 100 }] }); // Устанавливаем язык "Unknown"
+			}
 
           const [result_scan, result_detect_language] = await Promise.all([scan_Promise, languagePromise]);
 		  let score = result_scan[0];
@@ -126,7 +129,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           cache.set(url, { score, language });
 
           // Проверяем, превышает ли score лимит или язык не английский и не русский
-          if (score > settings.limit || (language && !['en', 'ru'].includes(language))) {
+          if (score > settings.limit || (language && !['en', 'ru', 'unknown'].includes(language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
               chrome.storage.local.set({ status: "blocked_by_scan", score, language,foundWords }, () => {
 				sendResponse({ status: "blocked", score, language });
