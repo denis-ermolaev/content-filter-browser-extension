@@ -71,11 +71,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("Настройки при получении сообщения:", settings);
         const url = sender.tab.url;
         console.log("Current URL:", url);
-		console.log(request.pageText)
+		console.log(request.pageText);
 		if (settings.whitelist.split('|').includes(getDomain(sender.tab.url)) ){
-			console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url) )
-			console.log(settings.whitelist)
-			sendResponse({ status: "success" })
+			console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url) );
+			console.log(settings.whitelist);
+			sendResponse({ status: "success" });
 		} else if (cache.has(url)) {
           // Если URL уже есть в кэше, используем закэшированный результат
           const cachedResult = cache.get(url);
@@ -97,25 +97,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           let languagePromise = Promise.resolve(null);
           const wordCount = request.pageText.split(/\s+/).length;
-          if (wordCount > 10) {
+          if (wordCount > 10) { // Кол-во слов для определения языка, возможно стоит увеличить ?
             console.log("Detecting language...");
             languagePromise = new Promise((resolve, reject) => {
               chrome.i18n.detectLanguage(request.pageText, (result) => {
                 if (chrome.runtime.lastError) {
                   reject(chrome.runtime.lastError);
                 } else {
-                  resolve(result.languages[0].language);
+                  //resolve(result.languages[0].language);
+				  resolve(result);
                 }
               });
             });
           }
 
-          const [result_scan, language] = await Promise.all([scan_Promise, languagePromise]);
-		  let score = result_scan[0]
-		  let foundWords = result_scan[1]
+          const [result_scan, result_detect_language] = await Promise.all([scan_Promise, languagePromise]);
+		  let score = result_scan[0];
+		  let foundWords = result_scan[1];
+		  let language = result_detect_language.languages[0].language;
+		  let language_detect_percentage = result_detect_language.languages[0].percentage;
           console.log("Scan complete. Score:", score);
 		  console.log("Scan complete. foundWords:", foundWords);
           console.log("Language detected:", language);
+		  console.log("Language detection accuracy percentage",language_detect_percentage);
 
           // Сохраняем результат в кэш
           console.log("Saving result to cache...");
