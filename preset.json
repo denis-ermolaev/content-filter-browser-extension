@@ -1,5 +1,5 @@
 {
-  "blockpage": "",
+  "blockpage": "animego.org|https://animego.org/",
   "limit": 160,
   "whitelist": "mozilla.org|dansguardian.org|stepik.org|netology.ru|github.com",
   "blockvals": [
