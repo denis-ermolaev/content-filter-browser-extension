@@ -24,8 +24,10 @@ class Settings {
               reject(error);
             });
           } else {
-            Object.assign(this, items);
-            resolve(items);
+            let data_for_setting_load = {blockpage: items['blockpage'], blockvals: items['blockvals'],limit: items['limit'],whitelist: items['whitelist'],}
+            Object.assign(this, data_for_setting_load);
+            //console.log(resolve, items );
+            resolve(data_for_setting_load); // Что это?
           }
         }
       });
