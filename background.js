@@ -11,7 +11,7 @@ const settingsLoaded = (async () => {
 
 
 
-
+// Сканирует сайт
 async function scanPageText(text) {
   await settingsLoaded;
 
@@ -65,18 +65,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   (async () => {
     try {
       // Ожидание загрузки настроек перед обработкой сообщения
-      await settingsLoaded;
-
+      await settingsLoaded; // Т.к бэграунд закрывается, нам перед всем остальным важно, чтобы настройки подгрузились заново
+      //Сейчас существует два типа сообщение "sendPageText" с content_end.js
+      // "checkWhitelistStatus" с content_start_blocking_video.js TODO: переименовать их, чтобы было понятно что это вообще
+      // TODO: нужен какой-то класс взаимодействий, чтобы ввести в код порядок и не делать много if else
+      // TODO: разнести повторяющие элементы в ф-и
       if (request.message === "sendPageText" && typeof request.pageText === 'string') {
         console.log("Настройки при получении сообщения:", settings);
         const url = sender.tab.url;
         console.log("Current URL:", url);
         console.log(request.pageText);
-        if (settings.whitelist.split('|').includes(getDomain(sender.tab.url))) {
+        if (settings.whitelist.split('|').includes(getDomain(sender.tab.url))) { // Есть ли сайт в белом списке
           console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url));
           console.log(settings.whitelist);
           sendResponse({ status: "success" });
-        } else if (settings.blockpage.split('|').includes(getDomain(sender.tab.url))) {
+        } else if (settings.blockpage.split('|').includes(getDomain(sender.tab.url))) { // Есть ли сайт в чёрном списке
           console.log("In blocklist");
           chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
             chrome.storage.local.set({ status: "blockList", score: 160, language: "unknown", foundWords: {} }, () => {
@@ -174,7 +177,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 
-// Событие изменения хранилища
+// Событие изменения хранилища. Если через option.html меняются настройки, то мы их здесь обновляем
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'local') {
     await settings.load();
