@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru', 'unknown'].includes(cachedResult.language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-              chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: {} }, () => {
+              chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: cachedResult.foundWords }, () => {
                 sendResponse({ status: "blocked", score: cachedResult.score });
               });
             });
@@ -133,7 +133,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           // Сохраняем результат в кэш
           console.log("Saving result to cache...");
-          cache.set(url, { score, language });
+          cache.set(url, { score, language, foundWords});
 
           // Проверяем, превышает ли score лимит или язык не английский и не русский
           if (score > settings.limit || (language && !['en', 'ru', 'unknown'].includes(language))) {
