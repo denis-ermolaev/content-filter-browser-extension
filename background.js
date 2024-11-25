@@ -77,10 +77,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           console.log(settings.whitelist);
           sendResponse({ status: "success" });
         } else if (settings.blockpage.split('|').includes(getDomain(sender.tab.url))) {
-          console.log("it is blockPage");
+          console.log("In blocklist");
           chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-            chrome.storage.local.set({ status: "blackList", score: 1, language: "cachedResult.language", foundWords: '' }, () => {
-              sendResponse({ status: "blackList", score: 1 });
+            chrome.storage.local.set({ status: "blockList", score: 160, language: "unknown", foundWords: {} }, () => {
+              sendResponse({ status: "blocked", score: 160 });
             });
           })
         } else if (cache.has(url)) {
@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru', 'unknown'].includes(cachedResult.language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-              chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: '' }, () => {
+              chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: {} }, () => {
                 sendResponse({ status: "blocked", score: cachedResult.score });
               });
             });

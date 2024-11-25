@@ -1,5 +1,5 @@
 {
-  "blockpage": "https://www.webpagetest.org/|www.webpagetest.org",
+  "blockpage": "www.webpagetest.org|www.webpagetest.org",
   "limit": 160,
   "whitelist": "mozilla.org|dansguardian.org|stepik.org|netology.ru|github.com",
   "blockvals": [
@@ -69,7 +69,7 @@
     },
     {
       "name": 150,
-      "value": "  порно  | луис.*?ройо |warning! you must be over 18 to proceed|nsfw|not safe for work"
+      "value": "аниме |  порно  | луис.*?ройо |warning! you must be over 18 to proceed|nsfw|not safe for work"
     }
   ]
 }
