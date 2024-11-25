@@ -1,7 +1,16 @@
+@import url(../../assets/fonts.css);
+
 body {
-    background-color: #121212; /* Темный фон */
-    color: #ffffff; /* Белый текст */
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    font-family: "Gilroy";
+    -webkit-font-smoothing: antialiased;
+    -webkit-overflow-scrolling: touch;
+    overflow-anchor: none;
+    overflow-x: hidden;
 }
+
 
 /* Ссылки */
 a {
