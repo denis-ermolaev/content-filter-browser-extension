@@ -5,21 +5,21 @@ var flaggedVideos = new Set();
 function killVideo(video) {
 	video.innerHTML = '';
 
-	if(video.hasAttribute("src")) {
+	if (video.hasAttribute("src")) {
 		video.removeAttribute("src");
 		video.load();
 	}
 }
 
 function nomovdo(element) {
-	document.querySelectorAll("video").forEach(function(video) {
-		if(flaggedVideos.has(video)) { return; }
+	document.querySelectorAll("video").forEach(function (video) {
+		if (flaggedVideos.has(video)) { return; }
 
 		flaggedVideos.add(video);
 
 		killVideo(video);
 
-		video.addEventListener("loadstart", function() {
+		video.addEventListener("loadstart", function () {
 			killVideo(video);
 		});
 	});
@@ -28,7 +28,7 @@ function nomovdo(element) {
 
 function beginNomovdo() {
 	var observer = new MutationObserver(nomovdo);
-	observer.observe(document, {childList: true, subtree: true});
+	observer.observe(document, { childList: true, subtree: true });
 
 	document.addEventListener("DOMContentLoaded", nomovdo);
 
@@ -36,9 +36,9 @@ function beginNomovdo() {
 }
 
 
-chrome.runtime.sendMessage({message: "checkWhitelistStatus"}, function(response) {
+chrome.runtime.sendMessage({ message: "checkWhitelistStatus" }, function (response) {
 	console.log(response)
-	if(response.status === "blockingVideo" ){
+	if (response.status === "blockingVideo") {
 		console.log("Блокировка видео началась, сайт не в белом списке")
 		beginNomovdo();
 	} else {

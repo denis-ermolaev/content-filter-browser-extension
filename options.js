@@ -8,7 +8,7 @@
 //
 //  const blockvalsContainer = document.getElementById('blockvals-container');
 //  const keys = [2, 3, 5, 10, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 120, 130, 150];
-//  
+//
 //  keys.forEach(key => {
 //    const label = document.createElement('label');
 //    label.innerHTML = `<span>${key}:</span> <input type="text" id="blockval-${key}" value="${settings.blockvals[key] || ''}"><br>`;

@@ -29,23 +29,23 @@ async function scanPageText(text) {
       let match;
       while ((match = regex.exec(text)) !== null) {
         score += parseInt(key);
-		if (foundWords[parseInt(key)]) {
-			if (Array.isArray(foundWords[parseInt(key)])) {
-				foundWords[parseInt(key)].push(match[0]);
-			} else {
-				foundWords[parseInt(key)] = [foundWords[parseInt(key)], match[0]];
-			}
-		} else {
-			foundWords[parseInt(key)] = match[0];
-		}
+        if (foundWords[parseInt(key)]) {
+          if (Array.isArray(foundWords[parseInt(key)])) {
+            foundWords[parseInt(key)].push(match[0]);
+          } else {
+            foundWords[parseInt(key)] = [foundWords[parseInt(key)], match[0]];
+          }
+        } else {
+          foundWords[parseInt(key)] = match[0];
+        }
         if (score > limit) {
-          return [ score, foundWords ]; // Возвращаем объект с счетом и списком слов, если счет превышает лимит
+          return [score, foundWords]; // Возвращаем объект с счетом и списком слов, если счет превышает лимит
         }
       }
     }
   }
 
-  return [ score, foundWords ]; // Возвращаем объект с итоговым счетом и списком всех найденных слов
+  return [score, foundWords]; // Возвращаем объект с итоговым счетом и списком всех найденных слов
 }
 
 function getDomain(url) {
@@ -71,21 +71,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("Настройки при получении сообщения:", settings);
         const url = sender.tab.url;
         console.log("Current URL:", url);
-		console.log(request.pageText);
-		if (settings.whitelist.split('|').includes(getDomain(sender.tab.url)) ){
-			console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url) );
-			console.log(settings.whitelist);
-			sendResponse({ status: "success" });
-		} else if (cache.has(url)) {
+        console.log(request.pageText);
+        if (settings.whitelist.split('|').includes(getDomain(sender.tab.url))) {
+          console.log("Сайт в белом списке, его домен", getDomain(sender.tab.url));
+          console.log(settings.whitelist);
+          sendResponse({ status: "success" });
+        } else if (settings.blockpage.split('|').includes(getDomain(sender.tab.url))) {
+          console.log("it is blockPage");
+          chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
+            chrome.storage.local.set({ status: "blackList", score: 1, language: "cachedResult.language", foundWords: '' }, () => {
+              sendResponse({ status: "blackList", score: 1 });
+            });
+          })
+        } else if (cache.has(url)) {
           // Если URL уже есть в кэше, используем закэшированный результат
           const cachedResult = cache.get(url);
           console.log("Using cached result:", cachedResult);
 
-          if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru','unknown'].includes(cachedResult.language))) {
+          if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru', 'unknown'].includes(cachedResult.language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-				chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score,language:cachedResult.language,foundWords:'' }, () => {
-				   sendResponse({ status: "blocked", score: cachedResult.score });
-			    });
+              chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: '' }, () => {
+                sendResponse({ status: "blocked", score: cachedResult.score });
+              });
             });
           } else {
             sendResponse({ status: "success", score: cachedResult.score });
@@ -105,24 +112,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   reject(chrome.runtime.lastError);
                 } else {
                   //resolve(result.languages[0].language);
-				  resolve(result);
+                  resolve(result);
                 }
               });
             });
           } else {
-				console.log("Too few words to detect language.");
-				languagePromise = Promise.resolve({ languages: [{ language: "unknown", percentage: 100 }] }); // Устанавливаем язык "Unknown"
-			}
+            console.log("Too few words to detect language.");
+            languagePromise = Promise.resolve({ languages: [{ language: "unknown", percentage: 100 }] }); // Устанавливаем язык "Unknown"
+          }
 
           const [result_scan, result_detect_language] = await Promise.all([scan_Promise, languagePromise]);
-		  let score = result_scan[0];
-		  let foundWords = result_scan[1];
-		  let language = result_detect_language.languages[0].language;
-		  let language_detect_percentage = result_detect_language.languages[0].percentage;
+          let score = result_scan[0];
+          let foundWords = result_scan[1];
+          let language = result_detect_language.languages[0].language;
+          let language_detect_percentage = result_detect_language.languages[0].percentage;
           console.log("Scan complete. Score:", score);
-		  console.log("Scan complete. foundWords:", foundWords);
+          console.log("Scan complete. foundWords:", foundWords);
           console.log("Language detected:", language);
-		  console.log("Language detection accuracy percentage",language_detect_percentage);
+          console.log("Language detection accuracy percentage", language_detect_percentage);
 
           // Сохраняем результат в кэш
           console.log("Saving result to cache...");
@@ -131,29 +138,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           // Проверяем, превышает ли score лимит или язык не английский и не русский
           if (score > settings.limit || (language && !['en', 'ru', 'unknown'].includes(language))) {
             chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
-              chrome.storage.local.set({ status: "blocked_by_scan", score, language,foundWords }, () => {
-				sendResponse({ status: "blocked", score, language });
-			  });
+              chrome.storage.local.set({ status: "blocked_by_scan", score, language, foundWords }, () => {
+                sendResponse({ status: "blocked", score, language });
+              });
             });
           } else {
             sendResponse({ status: "success", score, language });
           }
         }
-      }else if (request.message === "checkWhitelistStatus"){
-		  // Запуск для проверки блокировки видео
-		  console.log("Запрос на блокировку видео получен, проверяется белый список")
-		  const url_domen = getDomain(sender.tab.url);
-		  
-		  console.log(settings.whitelist)
-		  console.log("Внешний вид url", url_domen)
-		  if (settings.whitelist.split('|').includes(url_domen)){
-			console.log("Блокировка видео не возможна inWhiteList")
-			sendResponse({ status: "inWhiteList"});
-		  } else{
-			  sendResponse({ status: "blockingVideo"});
-		  }
-		  
-	  } else {
+      } else if (request.message === "checkWhitelistStatus") {
+        // Запуск для проверки блокировки видео
+        console.log("Запрос на блокировку видео получен, проверяется белый список")
+        const url_domen = getDomain(sender.tab.url);
+
+        console.log(settings.whitelist)
+        console.log("Внешний вид url", url_domen)
+        if (settings.whitelist.split('|').includes(url_domen)) {
+          console.log("Блокировка видео не возможна inWhiteList")
+          sendResponse({ status: "inWhiteList" });
+        } else {
+          sendResponse({ status: "blockingVideo" });
+        }
+
+      } else {
         sendResponse({ error: "Unknown message type or missing pageText" });
       }
     } catch (error) {
