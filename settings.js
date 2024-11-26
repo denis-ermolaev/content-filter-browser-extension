@@ -9,7 +9,7 @@ class Settings {
     this.limit = 0;
     this.whitelist = "";
   }
-
+  // Загрузка из хранилища браузера chrome.storage.local
   async load() {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(null, (items) => {
@@ -27,13 +27,14 @@ class Settings {
             let data_for_setting_load = {blockpage: items['blockpage'], blockvals: items['blockvals'],limit: items['limit'],whitelist: items['whitelist'],}
             Object.assign(this, data_for_setting_load);
             //console.log(resolve, items );
-            resolve(data_for_setting_load); // Что это?
+            resolve(data_for_setting_load);
           }
         }
       });
     });
   }
-
+  
+  //Загрузка настроек из пресета
   async loadFromPreset() {
     return new Promise(async (resolve, reject) => {
       try {
@@ -60,7 +61,7 @@ class Settings {
       }
     });
   }
-
+  
   async save() {
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({

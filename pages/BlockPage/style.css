@@ -4,6 +4,7 @@ body {
     margin: 0;
     width: 100%;
     height: 100vh;
+    background-color: #000000;
     font-family: "Gilroy";
     -webkit-font-smoothing: antialiased;
     -webkit-overflow-scrolling: touch;
@@ -11,6 +12,9 @@ body {
     overflow-x: hidden;
 }
 
+* {
+    color: antiquewhite;
+}
 
 /* Ссылки */
 a {

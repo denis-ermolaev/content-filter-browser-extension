@@ -1,3 +1,4 @@
+// Блокировка видео во всех фреймах(из манифеста - "all_frames": true,)
 console.log("content_start_blocking_video.js и блокировка видео запущены");
 
 var flaggedVideos = new Set();

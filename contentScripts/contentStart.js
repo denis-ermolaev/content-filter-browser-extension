@@ -1,4 +1,5 @@
 // content_start.js
+// Сокрытие страницы до сканирования
 console.log("content_start запущен")
 const observer = new MutationObserver(mutations => {
     if (document.body) {

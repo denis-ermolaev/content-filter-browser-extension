@@ -22,7 +22,7 @@ async function scanPageText(text) {
 
   const limit = settings.limit || 160;
   let score = 0;
-  let foundWords = {}; // Массив для сохранения найденных слов
+  let foundWords = {}; // Словарь для сохранения найденных слов
 
   for (const [key, value] of Object.entries(settings.blockvals)) {
     if (value) {
