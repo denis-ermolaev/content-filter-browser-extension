@@ -2,7 +2,7 @@
 console.log("content_start запущен")
 const observer = new MutationObserver(mutations => {
     if (document.body) {
-        document.body.classList.add('page-hidden');
+        document.body.style.display = "none";
         observer.disconnect(); // Останавливаем наблюдение после добавления класса
     }
 });

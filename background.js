@@ -2,6 +2,7 @@ importScripts('settings.js');
 
 const settings = new Settings();
 const cache = new Cache();
+console.log(settings)
 
 // Глобальный промис для загрузки настроек
 const settingsLoaded = (async () => {
@@ -81,7 +82,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ status: "success" });
         } else if (settings.blockpage.split('|').includes(getDomain(sender.tab.url))) { // Есть ли сайт в чёрном списке
           console.log("In blocklist");
-          chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
+          chrome.tabs.update(sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
             chrome.storage.local.set({ status: "blockList", score: 160, language: "unknown", foundWords: {} }, () => {
               sendResponse({ status: "blocked", score: 160 });
             });
@@ -92,7 +93,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           console.log("Using cached result:", cachedResult);
 
           if (cachedResult.score > settings.limit || (cachedResult.language && !['en', 'ru', 'unknown'].includes(cachedResult.language))) {
-            chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
+            chrome.tabs.update(sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
               chrome.storage.local.set({ status: "blocked_by_cache", score: cachedResult.score, language: cachedResult.language, foundWords: cachedResult.foundWords }, () => {
                 sendResponse({ status: "blocked", score: cachedResult.score });
               });
@@ -140,7 +141,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           // Проверяем, превышает ли score лимит или язык не английский и не русский
           if (score > settings.limit || (language && !['en', 'ru', 'unknown'].includes(language))) {
-            chrome.tabs.update(sender.tab.id, { url: 'blockpage.html' }, () => {
+            chrome.tabs.update(sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
               chrome.storage.local.set({ status: "blocked_by_scan", score, language, foundWords }, () => {
                 sendResponse({ status: "blocked", score, language });
               });
