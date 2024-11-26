@@ -3,7 +3,6 @@ body {
     color: #ffffff; /* Белый текст */
 }
 
-/* Стили для input-полей */
 input {
     width: 80%;
     flex: 1;
@@ -14,7 +13,6 @@ input {
     border-radius: 4px; /* Скругление углов */
 }
 
-/* Стили для меток */
 label {
     padding-right: 8px;
     display: inline-block;
@@ -24,40 +22,36 @@ label {
     color: #DDDDDD; /* Светло-серый цвет текста для лейблов */
 }
 
-/* Стили для параграфов */
 p {
     display: flex;
 }
 
-/* Стили для строк таблицы */
 .row {
     width: 100%;
     display: table-row;
     background-color: #1A1A1A; /* Слегка отличающийся темный фон для строк */
 }
 
-/* Стили для выравнивания по центру */
 .centered {
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
 
-/* Стили для ячеек таблицы */
 .cell {
     display: table-cell;
     padding: 10px; /* Отступы внутри ячеек */
     border-bottom: 1px solid #333333; /* Граница между ячейками */
 }
 
-/* Стили для блока с опциями */
 .options {
     width: 100%;
     padding: 10px;
     background-color: #1E1E1E; /* Темный фон для блока с опциями */
     border-radius: 4px; /* Скругление углов блока */
 }
-/* Общий стиль для кнопок */
+
+
 button {
     padding: 10px 20px; /* Отступы внутри кнопки */
     background-color: #282828; /* Темный фон для кнопок */
@@ -68,20 +62,17 @@ button {
     transition: background-color 0.3s, color 0.3s; /* Плавный переход цвета */
 }
 
-/* Стиль для кнопки при наведении */
 button:hover {
-    background-color: #3A3A3A; /* Чуть более светлый фон при наведении */
+    background-color: #3A3A3A;
 }
 
-/* Стиль для активной кнопки */
 button:active {
-    background-color: #1E1E1E; /* Темный фон при нажатии */
+    background-color: #1E1E1E; 
 }
 
-/* Стиль для отключенной (disabled) кнопки */
 button:disabled {
-    background-color: #3A3A3A; /* Серый фон для неактивной кнопки */
-    color: #777777; /* Светло-серый текст */
-    cursor: default; /* Стандартный курсор */
+    background-color: #3A3A3A; 
+    color: #777777; 
+    cursor: default; 
 }
 

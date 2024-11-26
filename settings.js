@@ -37,7 +37,7 @@ class Settings {
   async loadFromPreset() {
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(chrome.runtime.getURL('preset.json'));
+        const response = await fetch(chrome.runtime.getURL('utils/preset.json'));
         const preset = await response.json();
 
         // Преобразуем blockvals в объект
