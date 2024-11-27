@@ -16,7 +16,8 @@
     "service_worker": "background.js"
   },
   "options_ui": {
-    "page": "pages/Options/index.html"
+    "page": "pages/Options/index.html",
+    "open_in_tab": true
   },
   "content_scripts": [
     {

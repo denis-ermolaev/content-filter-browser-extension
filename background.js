@@ -2,28 +2,24 @@ importScripts('settings.js');
 
 const settings = new Settings();
 const cache = new Cache();
-console.log(settings) // Пустые настройки
+//console.log(settings) // Пустые настройки
 
 
 // Прослушивание событие отправки сообщений на бэграунд. Получает запросы с других скриптов
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // calback должен быть обязательно синхронным
   const asyncHandler = async () => { //Поэтому внутри него создаём асинхронную ф-ю
     try {
-      await settings.load(); // Получение настроек
-      console.log("Асинхронная ф-я", request, settings);
+      await settings.load();
+      console.log("Асинхронная ф-я прослушивания сообщений", request, settings);
       // Здесь потом ещё нужно будет ожидать загрузку кэша, когда он будет сохранять свои данные в хранилище
 
       const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache);
       await message_handler.request_processing(); // Обработка сообщений и отправка ответа
-      
     } catch(error) {
       console.error(error);
-      if (typeof sendResponse === 'function') {
-        sendResponse({ error: error.message });
-      }
+      sendResponse({ error: error.message });
     }
   };
-
   asyncHandler();
   return true;
 });
@@ -31,7 +27,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // cal
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'local') {
     await settings.load();
-    console.log("Настройки обновлены:", settings);
+    console.log("Обновление в хранилище, настроки обновлены:", settings);
   }
 });
 
