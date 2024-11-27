@@ -37,7 +37,7 @@ function beginNomovdo() {
 }
 
 
-chrome.runtime.sendMessage({ message: "checkWhitelistStatus" }, function (response) {
+chrome.runtime.sendMessage({ message: "checkWhitelistStatus" }, async (response) => {
 	console.log(response)
 	if (response.status === "blockingVideo") {
 		console.log("Блокировка видео началась, сайт не в белом списке")

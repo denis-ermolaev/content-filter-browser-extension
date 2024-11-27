@@ -8,35 +8,49 @@ class Settings {
     };
     this.limit = 0;
     this.whitelist = "";
+    this.ready = false;
   }
-  // Загрузка из хранилища браузера chrome.storage.local
-  async load() {
+  
+  getFromStorage() { // не async т.к возвращает промис явно
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(null, (items) => {
         if (chrome.runtime.lastError) {
-          console.error('Error loading from chrome.storage.local:', chrome.runtime.lastError);
-          reject(chrome.runtime.lastError);
+          reject(chrome.runtime.lastError); //resolve - успех, reject - неудача
         } else {
-          if (Object.keys(items).length === 0) {
-            // Если хранилище пусто, загружаем начальные настройки из preset.json
-            this.loadFromPreset().then(resolve).catch(error => {
-              console.error('Error loading from preset:', error);
-              reject(error);
-            });
-          } else {
-            let data_for_setting_load = {blockpage: items['blockpage'], blockvals: items['blockvals'],limit: items['limit'],whitelist: items['whitelist'],}
-            Object.assign(this, data_for_setting_load);
-            //console.log(resolve, items );
-            resolve(data_for_setting_load);
-          }
+          resolve(items);
         }
       });
     });
   }
   
+  // Загрузка из хранилища браузера chrome.storage.local
+  async load() {
+    if (this.ready) {
+      return true;
+    } else {
+      let items_from_storage = await this.getFromStorage()
+      if (Object.keys(items_from_storage).length === 0) {
+        // Если loadFromPreset асинхронный - используем await
+        await this.loadFromPreset();
+        this.ready = true
+      } else {
+          let data_for_setting_load = {
+              blockpage: items_from_storage['blockpage'], 
+              blockvals: items_from_storage['blockvals'],
+              limit: items_from_storage['limit'],
+              whitelist: items_from_storage['whitelist']
+          };
+          Object.assign(this, data_for_setting_load);
+          this.ready = true;
+          return true;
+      }
+    }
+  }
+
   //Загрузка настроек из пресета
-  async loadFromPreset() {
-    return new Promise(async (resolve, reject) => {
+  loadFromPreset() {
+    return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
+      console.log("Запуск loadFromPreset")
       try {
         const response = await fetch(chrome.runtime.getURL('utils/preset.json'));
         const preset = await response.json();
@@ -82,7 +96,7 @@ class Settings {
 }
 
 // Класс для кэширования результатов сканирования
-class Cache {
+class Cache { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
   constructor() {
     this.cache = {};
   }
@@ -106,7 +120,109 @@ class Cache {
   }
 }
 
+class MessageHandler {
+  constructor(request, sender, sendResponse,settings, cache) {
+    this.request = request; // "checkWhitelistStatus" с content_start_blocking_video.js TODO: переименовать их, чтобы было понятно что это вообще
+    this.sender = sender
+    this.sendResponse = sendResponse
+    this.settings = settings
+    this.cache = cache
+  }
+  async request_processing() {
+    try {
+      if (this.request.message === "sendPageText" && typeof this.request.pageText === 'string') {
+        await this.sendPageText_processing()
+      } else if (this.request.message === "checkWhitelistStatus") {
+        this.checkWhitelistStatus_processing()
+      } else {
+        this.sendResponse({ error: "Unknown message type or missing pageText" });
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+      this.sendResponse({ error: error.message });
+    }
+  }
+  async sendPageText_processing() {
+    const result_scan = await this.scanPageText(this.request.pageText);
+    let score = result_scan[0];
+    let foundWords = result_scan[1];
+    console.log("Scan complete. Score:", score);
+    console.log("Scan complete. foundWords:", foundWords);  
+    // Проверяем, превышает ли score лимит или язык не английский и не русский
+    if (score > this.settings.limit) {
+      await new Promise((resolve, reject) => {
+        chrome.tabs.update(this.sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
+          chrome.storage.local.set({ status: "blocked_by_scan", score, foundWords }, () => {
+            this.sendResponse({ status: "blocked", score });
+            resolve();
+          });
+        });
+      });
+    } else {
+      this.sendResponse({ status: "success", score });
+    }
+  }
+  checkWhitelistStatus_processing() {
+    console.log("Запрос на блокировку видео получен, проверяется белый список")
+    const url_domen = this.getDomain(this.sender.tab.url);    
+    console.log(this.settings.whitelist)
+    console.log("Внешний вид url", url_domen)
+    if (this.settings.whitelist.split('|').includes(url_domen)) {
+      console.log("Блокировка видео не возможна inWhiteList")
+      this.sendResponse({ status: "inWhiteList" });
+    } else {
+      this.sendResponse({ status: "blockingVideo" });
+    }
+  }
+
+  // Нужно вынести такие проверки в класс настроек
+  getDomain(url) {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch (error) {
+      console.error("Ошибка разбора URL:", error);
+      return null; // Или другое значение по умолчанию
+    }
+  }
+  async scanPageText(text) {
+    //await settingsLoaded;
+  
+    if (typeof text !== 'string') {
+      throw new Error("Provided text is not a string");
+    }
+  
+    const limit = this.settings.limit || 160;
+    let score = 0;
+    let foundWords = {}; // Словарь для сохранения найденных слов
+  
+    for (const [key, value] of Object.entries(this.settings.blockvals)) {
+      if (value) {
+        const regex = new RegExp(value, 'gi');
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+          score += parseInt(key);
+          if (foundWords[parseInt(key)]) {
+            if (Array.isArray(foundWords[parseInt(key)])) {
+              foundWords[parseInt(key)].push(match[0]);
+            } else {
+              foundWords[parseInt(key)] = [foundWords[parseInt(key)], match[0]];
+            }
+          } else {
+            foundWords[parseInt(key)] = match[0];
+          }
+          if (score > limit) {
+            return [score, foundWords]; // Возвращаем объект с счетом и списком слов, если счет превышает лимит
+          }
+        }
+      }
+    }
+  
+    return [score, foundWords]; // Возвращаем объект с итоговым счетом и списком всех найденных слов
+  }
+}
+
 // Экспортируем классы, чтобы они были доступны в importScripts
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { Settings, Cache };
+  module.exports = { Settings, Cache, MessageHandler };
 }
