@@ -1,37 +1,27 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>Page was blocked</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page was blocking</title>
     <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <img src="../../assets/icons/128.png" alt="JSGuardian - Filter Within Your Browser"/>
-    <h1>Filter Within Your Browser</h1>
-    <h3>
-      This page has been blocked by <em>Web Content Filter</em>.
-    </h3>
-    <p>
-      It could be possible to
-      allow this domain in <a id="showOptions">the settings</a> (see
-      <em>whitelist</em>).
-    </p>
-    
-    <!-- Добавляем элементы для отображения данных -->
-    <div>
-      <strong>Status:</strong> <span id="status"></span><br>
-      <strong>Score:</strong> <span id="score"></span><br>
-      <strong>Language:</strong> <span id="language"></span><br>
+</head>
+<body>
+    <div class="outer">
+        <div class="headerone">
+            <img src="../../assets/icons/128.png" alt="icon"/>
+            <h1>Page was blocking by <b>Content-Filter Extention</b></h1>
+            <details>
+                <summary>DEBUG <span id="sensitivePhrases"></span></summary>
+                <strong>Status:</strong> <span id="status"></span><br>
+                <strong>Score:</strong> <span id="score"></span><br>
+                <strong>Language:</strong> <span id="language"></span><br>
+                <p id="phrases"></p>
+                <p><strong>Found Words:</strong></p>
+                <div id="foundWordsContainer"></div> <!-- Контейнер для найденных слов -->
+                </details>
+        </div>
     </div>
-
-	<details>
-	<summary>sensitive phrases <span id="sensitivePhrases"></span></summary>
-	<p id="phrases"></p>
-	<p><strong>Found Words:</strong></p>
-	<div id="foundWordsContainer"></div> <!-- Контейнер для найденных слов -->
-	</details>
-    
     <script src="index.js"></script>
-  </body>
+</body>
 </html>

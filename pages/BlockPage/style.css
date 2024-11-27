@@ -1,61 +1,19 @@
 @import url(../../assets/fonts.css);
 
 body {
-    margin: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: #000000;
-    font-family: "Gilroy";
-    -webkit-font-smoothing: antialiased;
-    -webkit-overflow-scrolling: touch;
-    overflow-anchor: none;
-    overflow-x: hidden;
+    background-color: rgb(0, 0, 0);
 }
-
-* {
-    color: antiquewhite;
-}
-
-/* Ссылки */
-a {
-    color: #1E90FF; /* Светло-голубой цвет для ссылок */
-    cursor: pointer;
-}
-
-/* Заголовки H1 */
-h1 {
-    font-size: 32px;
-    display: inline-block;
-    color: #FFD700; /* Желтый цвет для заголовков H1 */
-}
-
-/* Адаптивный размер для H1 на больших экранах */
-@media screen and (min-width: 400px) {
-    h1 {
-        font-size: 48px;
-    }
-}
-
-/* Заголовки H2 */
-h2 {
-    display: inline-block;
-    color: #00FF00; /* Зеленый цвет для заголовков H2 */
-}
-
-/* Изображения */
 img {
-    height: 72px;
-    border: 1px solid #ffffff; /* Белая рамка вокруг изображений */
+    border-radius: 30px;
 }
-
-/* Блок с информацией об авторских правах */
-.giveback {
-    font-size: 14px;
-    font-style: italic;
-    color: #AAAAAA; /* Серый цвет текста */
+.outer {
+  display: grid;
+  /* border: 2px solid blue; */
 }
-
-.giveback a {
-    color: #AAAAAA; /* Серый цвет для ссылок в блоке авторских прав */
-    text-decoration: underline;
+.headerone {
+    margin: 15vh;
+    /* border: 2px solid rgb(93, 28, 28); */
+    min-height: 65vh;
+    text-align: center;
+    color: aliceblue;
 }

@@ -20,19 +20,18 @@ chrome.storage.local.get(['status', 'score', 'language', 'foundWords'], (data) =
     for (const key in foundWords) {
       if (foundWords.hasOwnProperty(key)) {
         const phrases = [foundWords[key],];
+        
         if (typeof foundWords[key] != 'object') {
             const phrases = [foundWords[key],];
         } else {
             const phrases = foundWords[key];
         }
 
-
         const groupHeader = document.createElement('h4');
         groupHeader.textContent = `Weight ${key}:`;
         foundWordsContainer.appendChild(groupHeader);
-
-
-        const list = document.createElement('ul');
+        
+        const list = document.createElement('div');
         //console.log(foundWords);
         //console.log("phrases", phrases);
         phrases.forEach(phrase => {
