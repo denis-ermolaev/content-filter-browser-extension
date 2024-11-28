@@ -7,13 +7,12 @@ img {
     border-radius: 30px;
 }
 .outer {
-  display: grid;
-  /* border: 2px solid blue; */
+    display: flex;
+    height: 100vh;
 }
 .headerone {
-    margin: 15vh;
-    /* border: 2px solid rgb(93, 28, 28); */
-    min-height: 65vh;
+    font-family: Gilroy;
+    margin: auto;
     text-align: center;
     color: aliceblue;
 }
