@@ -1,4 +1,4 @@
-importScripts('settings.js');
+import { Settings, Cache, MessageHandler } from './settings.js';
 
 const settings = new Settings();
 const cache = new Cache();

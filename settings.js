@@ -230,6 +230,4 @@ class MessageHandler {
 }
 
 // Экспортируем классы, чтобы они были доступны в importScripts
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { Settings, Cache, MessageHandler };
-}
+export { Settings, Cache, MessageHandler };
