@@ -144,7 +144,7 @@ class MessageHandler {
     }
   }
   async sendPageText_processing() {
-    const result_scan = await this.scanPageText(this.request.pageText); // [score, foundWords]
+    const result_scan = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
     let score = result_scan[0];
     let foundWords = result_scan[1];
     console.log("Scan complete. Score:", score);
@@ -158,7 +158,7 @@ class MessageHandler {
   // Обработка сообщения о блокировки видео из contentVideo.js
   checkWhitelistStatus_processing() {
     console.log("Запрос на блокировку видео получен, проверяется белый список")
-    const url_domen = this.getDomain(this.sender.tab.url);    
+    const url_domen = getDomain(this.sender.tab.url);    
     console.log(this.settings.whitelist)
     console.log("Внешний вид url", url_domen)
     if (this.settings.whitelist.split('|').includes(url_domen)) {
@@ -179,55 +179,58 @@ class MessageHandler {
       });
     });
   }
-  //Обслуживающие Ф-И
-  //
-  //
-  // TODO: Нужно вынести такие проверки в класс настроек или куда-то ещё
-  // Получение домена из url адресса
-  getDomain(url) {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.hostname;
-    } catch (error) {
-      console.error("Ошибка разбора URL:", error);
-      return null; // Или другое значение по умолчанию
-    }
+}
+
+//
+// Обслуживающие функции
+//
+
+function getDomain(url) {
+  // Получение домена из url
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname;
+  } catch (error) {
+    console.error("Ошибка разбора URL:", error);
+    return null; // Или другое значение по умолчанию
   }
+}
+
+async function scanPageText(text, settings) {
   // Сканирование страницы
-  async scanPageText(text) {
-    if (typeof text !== 'string') {
-      throw new Error("Provided text is not a string");
-    }
-  
-    const limit = this.settings.limit || 160; // При превышении сканирование заканчивается 
-    let score = 0;
-    let foundWords = {}; // Словарь для сохранения найденных слов
-  
-    for (const [key, value] of Object.entries(this.settings.blockvals)) {
-      if (value) {
-        const regex = new RegExp(value, 'gi');
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-          score += parseInt(key);
-          if (foundWords[parseInt(key)]) {
-            if (Array.isArray(foundWords[parseInt(key)])) {
-              foundWords[parseInt(key)].push(match[0]);
-            } else {
-              foundWords[parseInt(key)] = [foundWords[parseInt(key)], match[0]];
-            }
+  if (typeof text !== 'string') {
+    throw new Error("Provided text is not a string");
+  }
+
+  const limit = settings.limit || 160; // При превышении сканирование заканчивается 
+  let score = 0;
+  let foundWords = {}; // Словарь для сохранения найденных слов
+
+  for (const [key, value] of Object.entries(settings.blockvals)) {
+    if (value) {
+      const regex = new RegExp(value, 'gi');
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        score += parseInt(key);
+        if (foundWords[parseInt(key)]) {
+          if (Array.isArray(foundWords[parseInt(key)])) {
+            foundWords[parseInt(key)].push(match[0]);
           } else {
-            foundWords[parseInt(key)] = match[0];
+            foundWords[parseInt(key)] = [foundWords[parseInt(key)], match[0]];
           }
-          if (score > limit) {
-            return [score, foundWords];
-          }
+        } else {
+          foundWords[parseInt(key)] = match[0];
+        }
+        if (score > limit) {
+          return [score, foundWords];
         }
       }
     }
-  
-    return [score, foundWords];
   }
+
+  return [score, foundWords];
 }
+
 
 // Экспортируем классы, чтобы они были доступны в importScripts
 export { Settings, Cache, MessageHandler };
