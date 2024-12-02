@@ -50,7 +50,6 @@ class Settings {
   //Загрузка настроек из пресета
   loadFromPreset() {
     return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
-      console.log("Запуск settings.loadFromPreset")
       try {
         const response = await fetch(chrome.runtime.getURL('utils/preset.json'));
         const preset = await response.json();
@@ -120,13 +119,14 @@ class Cache { // Нужно чтобы кэш сохранял результа�
 }
 
 class MessageHandler {
-  constructor(request, sender, sendResponse,settings, cache) {
+  constructor(request, sender, sendResponse,settings, cache, logger) {
     this.request = request; // {message: 'message', ...} - принятое сообщение
 
     this.sender = sender // Информация о вкладки, её id(sender.tab.id), статус, активность url(sender.tab.url)
     this.sendResponse = sendResponse // Ф-я для отправки сообщения обратно. Синтаксис sendResponse(массив_или_объект)
     this.settings = settings
     this.cache = cache
+    this.logger = logger
   }
   // Обработка типа сообщения и вызов соответствующего метода
   async request_processing() {
@@ -144,11 +144,12 @@ class MessageHandler {
     }
   }
   async sendPageText_processing() {
+    this.logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
     const result_scan = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
     let score = result_scan[0];
     let foundWords = result_scan[1];
-    console.log("Scan complete. Score:", score);
-    console.log("Scan complete. foundWords:", foundWords);
+    this.logger.log('sendPageText_processing', "Scan complete. Score:", score);
+    this.logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
     if (score > this.settings.limit) {
       await this.update_on_blocking_page("Block page by scan", score, foundWords)
     } else {
@@ -157,12 +158,12 @@ class MessageHandler {
   }
   // Обработка сообщения о блокировки видео из contentVideo.js
   checkWhitelistStatus_processing() {
-    console.log("Запрос на блокировку видео получен, проверяется белый список")
-    const url_domen = getDomain(this.sender.tab.url);    
-    console.log(this.settings.whitelist)
-    console.log("Внешний вид url", url_domen)
+    this.logger.log('checkWhitelistStatus_processing', "Запрос на блокировку видео получен, проверяется белый список");
+    const url_domen = getDomain(this.sender.tab.url);
+    this.logger.log('checkWhitelistStatus_processing', this.settings.whitelist);
+    this.logger.log('checkWhitelistStatus_processing', "Внешний вид url", url_domen);
     if (this.settings.whitelist.split('|').includes(url_domen)) {
-      console.log("Блокировка видео не возможна inWhiteList")
+      this.logger.log('checkWhitelistStatus_processing', "Блокировка видео не возможна inWhiteList");
       this.sendResponse({ status: "inWhiteList" });
     } else {
       this.sendResponse({ status: "blockingVideo" });
@@ -178,6 +179,22 @@ class MessageHandler {
         });
       });
     });
+  }
+}
+
+class Logger {
+  constructor() {
+    this.logging = {
+      general_logging: false,
+      sendPageText_processing: false,
+      checkWhitelistStatus_processing: false,
+      Data_science: false
+    }
+  }
+  log(module_name, ...args) {
+    if (this.logging[module_name]) {
+      console.log(...args);
+    }
   }
 }
 
@@ -233,4 +250,4 @@ async function scanPageText(text, settings) {
 
 
 // Экспортируем классы, чтобы они были доступны в importScripts
-export { Settings, Cache, MessageHandler };
+export { Settings, Cache, MessageHandler, Logger };

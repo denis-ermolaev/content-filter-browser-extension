@@ -1,33 +1,15 @@
-//Получение текста страницы
 console.log("content_end.js запущен");
 
-// Функция для получения текста всей страницы
-function getFullPageText(element) {
-  let text = element.innerText || "";
+function getFullPageText(pageText) {
+  let text = pageText;
   return text.replace(/\s+/g, ' ').trim(); // Убираем лишние пробелы
 }
 
-console.log('DOM полностью загружен и разобран');
+let pageText = getFullPageText(document.body.innerText);
 
-// Копируем body
-let bodyClone = document.body.cloneNode(true);
+console.log(pageText);
 
-// Убираем скрытие на копии
-//bodyClone.style.visibility = 'visible';
-bodyClone.style.display = 'block';
-// bodyClone.classList.remove('page-hidden');
-
-// Добавляем копию к документу, чтобы можно было извлечь текст
-document.documentElement.appendChild(bodyClone);
-
-// Получение полного текста страницы из копии
-let pageText = getFullPageText(bodyClone);
-console.log('Полный текст страницы получен:', pageText);
-
-// Удаляем копию после извлечения текста
-document.documentElement.removeChild(bodyClone);
-
-// Отправка текста в background.js
+//Отправка текста в background.js
 chrome.runtime.sendMessage(
   { message: "sendPageText", pageText: pageText },
   async (response) => {
@@ -36,11 +18,9 @@ chrome.runtime.sendMessage(
     } else {
       console.log("Page text sent successfully");
 
-      // После завершения обработки показываем содержимое страницы
-      //document.body.style.visibility = 'visible';
-      document.body.style.display = 'block';
-
-      // document.body.classList.remove('page-hidden');
+      document.body.style.opacity = 1;
+      //document.body.classList.remove('page-hidden');
+      //document.body.classList.remove('page-hidden');
       console.log('Содержимое страницы показано');
     }
   }

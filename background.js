@@ -1,7 +1,19 @@
-import { Settings, Cache, MessageHandler } from './settings.js';
+import { Settings, Cache, MessageHandler, Logger } from './settings.js';
 
 const settings = new Settings();
 const cache = new Cache();
+
+// Включение - выключение логгирования
+// Синтаксис logger.log(module_name, то что нужно распечатать)
+const logger = new Logger();
+//logger.logging['general_logging'] = true
+//logger.logging['sendPageText_processing'] = true
+//logger.logging['checkWhitelistStatus_processing'] = true
+
+
+logger.logging['Data_science'] = true
+
+
 //console.log(settings) // Пустые настройки
 
 
@@ -10,10 +22,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // cal
   const asyncHandler = async () => { //Поэтому внутри него создаём асинхронную ф-ю
     try {
       await settings.load();
-      console.log("Асинхронная ф-я прослушивания сообщений", request, settings);
+      logger.log('general_logging', "Асинхронная ф-я прослушивания сообщений", request, settings);
       // Здесь потом ещё нужно будет ожидать загрузку кэша, когда он будет сохранять свои данные в хранилище
 
-      const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache);
+      const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache, logger);
       await message_handler.request_processing(); // Обработка сообщений и отправка ответа
     } catch(error) {
       console.error(error);
@@ -27,7 +39,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // cal
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'local') {
     await settings.load();
-    console.log("Обновление в хранилище, настроки обновлены:", settings);
+    logger.log('general_logging',"Обновление в хранилище, настроки обновлены:", settings);
   }
 });
 

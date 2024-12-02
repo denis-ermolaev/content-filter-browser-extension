@@ -47,7 +47,7 @@
       "js": [
         "contentScripts/contentEnd.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_end"
     }
   ],
   "update_url": "https://clients2.google.com/service/update2/crx"
