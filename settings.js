@@ -1,5 +1,5 @@
 class Settings {
-  constructor() {
+  constructor(logger) {
     this.blockpage = ""; // "домен_сайта|домен_другого_сайта"
     this.whitelist = "";
     this.limit = 0;
@@ -9,6 +9,7 @@ class Settings {
       100: "", 120: "", 130: "", 150: ""
     };
     this.ready = false; // Готовность, чтобы не загружать настройки несколько раз
+    this.logger = logger
   }
   
   getFromStorage() { // не async т.к возвращает промис явно (в чём отличие ?)
@@ -25,6 +26,7 @@ class Settings {
   
   // Загрузка из хранилища браузера chrome.storage.local
   async load() {
+    this.logger.log("settings", "Метод load из класса Settings запущен")
     if (this.ready) {
       return true;
     } else {
@@ -49,6 +51,7 @@ class Settings {
 
   //Загрузка настроек из пресета
   loadFromPreset() {
+    this.logger.log("settings", "Метод loadFromPreset из класса Settings запущен")
     return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
       try {
         const response = await fetch(chrome.runtime.getURL('utils/preset.json'));
@@ -75,6 +78,7 @@ class Settings {
   }
   
   async save() {
+    this.logger.log("settings", "Метод save из класса Settings запущен")
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({
         blockpage: this.blockpage,
@@ -95,8 +99,9 @@ class Settings {
 
 // Класс для кэширования результатов сканирования
 class Cache { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
-  constructor() {
+  constructor(logger) {
     this.cache = {};
+    this.logger = logger
   }
 
   // Получение результата из кэша
@@ -185,10 +190,12 @@ class MessageHandler {
 class Logger {
   constructor() {
     this.logging = {
+      Data_science: false,
       general_logging: false,
       sendPageText_processing: false,
       checkWhitelistStatus_processing: false,
-      Data_science: false
+      settings: false,
+      caches: false
     }
   }
   log(module_name, ...args) {

@@ -1,20 +1,19 @@
 import { Settings, Cache, MessageHandler, Logger } from './settings.js';
 
-const settings = new Settings();
-const cache = new Cache();
-
 // Включение - выключение логгирования
 // Синтаксис logger.log(module_name, то что нужно распечатать)
 const logger = new Logger();
 //logger.logging['general_logging'] = true
 //logger.logging['sendPageText_processing'] = true
 //logger.logging['checkWhitelistStatus_processing'] = true
-
-
+//logger.logging['settings'] = true
+//logger.logging['caches'] = true
 logger.logging['Data_science'] = true
 
 
-//console.log(settings) // Пустые настройки
+const settings = new Settings(logger);
+logger.log('general_logging',settings) // Пустные настройки
+const cache = new Cache(logger);
 
 
 // Прослушивание событие отправки сообщений на бэграунд. Получает запросы с других скриптов
