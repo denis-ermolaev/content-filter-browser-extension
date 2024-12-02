@@ -1,3 +1,8 @@
+//
+// ! Объявление классов
+//
+
+
 class Logger {
   constructor() {
     this.logging = {
@@ -203,7 +208,7 @@ class MessageHandler {
 
 
 //
-// Обслуживающие функции
+// ! Обслуживающие функции
 //
 
 function getDomain(url) {
@@ -253,6 +258,11 @@ async function scanPageText(text, settings) {
 }
 
 
+//
+// ! Объявление переменных
+//
+
 const logger = new Logger();
+
 // Экспортируем классы, чтобы они были доступны в importScripts
 export { Settings, Cache, MessageHandler, logger };
