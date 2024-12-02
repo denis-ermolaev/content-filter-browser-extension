@@ -1,5 +1,24 @@
+class Logger {
+  constructor() {
+    this.logging = {
+      Data_science: false,
+      general_logging: false,
+      sendPageText_processing: false,
+      checkWhitelistStatus_processing: false,
+      settings: false,
+      caches: false
+    }
+  }
+  log(module_name, ...args) {
+    if (this.logging[module_name]) {
+      console.log(...args);
+    }
+  }
+}
+
+
 class Settings {
-  constructor(logger) {
+  constructor() {
     this.blockpage = ""; // "домен_сайта|домен_другого_сайта"
     this.whitelist = "";
     this.limit = 0;
@@ -9,7 +28,6 @@ class Settings {
       100: "", 120: "", 130: "", 150: ""
     };
     this.ready = false; // Готовность, чтобы не загружать настройки несколько раз
-    this.logger = logger
   }
   
   getFromStorage() { // не async т.к возвращает промис явно (в чём отличие ?)
@@ -26,7 +44,7 @@ class Settings {
   
   // Загрузка из хранилища браузера chrome.storage.local
   async load() {
-    this.logger.log("settings", "Метод load из класса Settings запущен")
+    logger.log("settings", "Метод load из класса Settings запущен")
     if (this.ready) {
       return true;
     } else {
@@ -51,7 +69,7 @@ class Settings {
 
   //Загрузка настроек из пресета
   loadFromPreset() {
-    this.logger.log("settings", "Метод loadFromPreset из класса Settings запущен")
+    logger.log("settings", "Метод loadFromPreset из класса Settings запущен")
     return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
       try {
         const response = await fetch(chrome.runtime.getURL('utils/preset.json'));
@@ -78,7 +96,7 @@ class Settings {
   }
   
   async save() {
-    this.logger.log("settings", "Метод save из класса Settings запущен")
+    logger.log("settings", "Метод save из класса Settings запущен")
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({
         blockpage: this.blockpage,
@@ -99,9 +117,8 @@ class Settings {
 
 // Класс для кэширования результатов сканирования
 class Cache { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
-  constructor(logger) {
+  constructor() {
     this.cache = {};
-    this.logger = logger
   }
 
   // Получение результата из кэша
@@ -124,16 +141,13 @@ class Cache { // Нужно чтобы кэш сохранял результа�
 }
 
 class MessageHandler {
-  constructor(request, sender, sendResponse,settings, cache, logger) {
+  constructor(request, sender, sendResponse,settings, cache) {
     this.request = request; // {message: 'message', ...} - принятое сообщение
-
     this.sender = sender // Информация о вкладки, её id(sender.tab.id), статус, активность url(sender.tab.url)
     this.sendResponse = sendResponse // Ф-я для отправки сообщения обратно. Синтаксис sendResponse(массив_или_объект)
     this.settings = settings
     this.cache = cache
-    this.logger = logger
   }
-  // Обработка типа сообщения и вызов соответствующего метода
   async request_processing() {
     try {
       if (this.request.message === "sendPageText" && typeof this.request.pageText === 'string') {
@@ -149,12 +163,12 @@ class MessageHandler {
     }
   }
   async sendPageText_processing() {
-    this.logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
+    logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
     const result_scan = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
     let score = result_scan[0];
     let foundWords = result_scan[1];
-    this.logger.log('sendPageText_processing', "Scan complete. Score:", score);
-    this.logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
+    logger.log('sendPageText_processing', "Scan complete. Score:", score);
+    logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
     if (score > this.settings.limit) {
       await this.update_on_blocking_page("Block page by scan", score, foundWords)
     } else {
@@ -163,12 +177,12 @@ class MessageHandler {
   }
   // Обработка сообщения о блокировки видео из contentVideo.js
   checkWhitelistStatus_processing() {
-    this.logger.log('checkWhitelistStatus_processing', "Запрос на блокировку видео получен, проверяется белый список");
+    logger.log('checkWhitelistStatus_processing', "Запрос на блокировку видео получен, проверяется белый список");
     const url_domen = getDomain(this.sender.tab.url);
-    this.logger.log('checkWhitelistStatus_processing', this.settings.whitelist);
-    this.logger.log('checkWhitelistStatus_processing', "Внешний вид url", url_domen);
+    logger.log('checkWhitelistStatus_processing', this.settings.whitelist);
+    logger.log('checkWhitelistStatus_processing', "Внешний вид url", url_domen);
     if (this.settings.whitelist.split('|').includes(url_domen)) {
-      this.logger.log('checkWhitelistStatus_processing', "Блокировка видео не возможна inWhiteList");
+      logger.log('checkWhitelistStatus_processing', "Блокировка видео не возможна inWhiteList");
       this.sendResponse({ status: "inWhiteList" });
     } else {
       this.sendResponse({ status: "blockingVideo" });
@@ -187,23 +201,6 @@ class MessageHandler {
   }
 }
 
-class Logger {
-  constructor() {
-    this.logging = {
-      Data_science: false,
-      general_logging: false,
-      sendPageText_processing: false,
-      checkWhitelistStatus_processing: false,
-      settings: false,
-      caches: false
-    }
-  }
-  log(module_name, ...args) {
-    if (this.logging[module_name]) {
-      console.log(...args);
-    }
-  }
-}
 
 //
 // Обслуживающие функции
@@ -256,5 +253,6 @@ async function scanPageText(text, settings) {
 }
 
 
+const logger = new Logger();
 // Экспортируем классы, чтобы они были доступны в importScripts
-export { Settings, Cache, MessageHandler, Logger };
+export { Settings, Cache, MessageHandler, logger };
