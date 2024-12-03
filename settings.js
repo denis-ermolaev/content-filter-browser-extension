@@ -1,4 +1,6 @@
 import eld from './efficient-language-detector-js-main/src/languageDetector.js';
+
+
 //
 // ! Объявление классов
 //
@@ -181,12 +183,13 @@ class MessageHandler {
     if (this.request.pageText.split(' ').length > 30){
       language = eld.detect(this.request.pageText).language
     }
-    console.log(language);
-    console.log(this.request.pageText.split(' ').length);
+    logger.log('sendPageText_processing',"Язык: ", language);
+    logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
 
-    // Решение о блокировки
-    if (score > this.settings.limit || !( ['ru', 'en', 'unknown'].includes(language) ) ) {
-      await this.update_on_blocking_page("Block page by scan", score, foundWords)
+    if (!( ['ru', 'en', 'unknown'].includes(language) )) {
+      await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
+    } else if (score > this.settings.limit) {
+      await this.update_on_blocking_page("Block page by scan", score, foundWords, language)
     } else {
       this.sendResponse({ status: "success", score });
     }
@@ -205,10 +208,10 @@ class MessageHandler {
     }
   }
 
-  update_on_blocking_page(status='',score=0,foundWords={}) {
+  update_on_blocking_page(status='',score=0,foundWords={}, language = 'unknown') {
     return new Promise((resolve, reject) => {
       chrome.tabs.update(this.sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
-        chrome.storage.local.set({ status: status, score, foundWords }, () => {
+        chrome.storage.local.set({ status: status, score, foundWords, language }, () => {
           this.sendResponse({ status: status, score });
           resolve();
         });
