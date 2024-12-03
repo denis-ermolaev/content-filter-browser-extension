@@ -1,3 +1,4 @@
+import eld from './efficient-language-detector-js-main/src/languageDetector.js';
 //
 // ! Объявление классов
 //
@@ -174,7 +175,17 @@ class MessageHandler {
     let foundWords = result_scan[1];
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
-    if (score > this.settings.limit) {
+
+    // Обработка языка
+    let language = 'unknown';
+    if (this.request.pageText.split(' ').length > 30){
+      language = eld.detect(this.request.pageText).language
+    }
+    console.log(language);
+    console.log(this.request.pageText.split(' ').length);
+
+    // Решение о блокировки
+    if (score > this.settings.limit || !( ['ru', 'en', 'unknown'].includes(language) ) ) {
       await this.update_on_blocking_page("Block page by scan", score, foundWords)
     } else {
       this.sendResponse({ status: "success", score });

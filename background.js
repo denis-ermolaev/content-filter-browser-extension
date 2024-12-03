@@ -1,5 +1,7 @@
 import { Settings, Cache, MessageHandler, logger } from './settings.js';
 
+
+
 // Включение - выключение логгирования
 // * Синтаксис logger.log(module_name, то что нужно распечатать)
 //logger.logging['general_logging'] = true
@@ -22,7 +24,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // cal
       await settings.load();
       logger.log('general_logging', "Асинхронная ф-я прослушивания сообщений", request, settings);
       // Здесь потом ещё нужно будет ожидать загрузку кэша, когда он будет сохранять свои данные в хранилище
-
+      
       const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache, logger);
       await message_handler.request_processing(); // Обработка сообщений и отправка ответа
     } catch(error) {
