@@ -24,11 +24,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { // cal
       await settings.load();
       logger.log('general_logging', "Асинхронная ф-я прослушивания сообщений", request, settings);
       // Здесь потом ещё нужно будет ожидать загрузку кэша, когда он будет сохранять свои данные в хранилище
-      const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache, logger);
+      const message_handler = new MessageHandler(request, sender, sendResponse, settings, cache);
       await message_handler.request_processing(); // Обработка сообщений и отправка ответа
     } catch(error) {
       console.error(error);
-      sendResponse({ error: error.message });
+      sendResponse({ error });
     }
   };
   asyncHandler();

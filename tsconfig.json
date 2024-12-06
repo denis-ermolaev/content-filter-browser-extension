@@ -1,19 +1,18 @@
 {
-    "compilerOptions": {
-      "target": "ES6", // Или ES2015 и выше
-      "lib": ["ES6", "DOM","es2017"], // Включаем библиотеки ES6 и DOM для работы с Promise и браузером
-      "module": "ES6", // Настройка модуля (опционально)
-      "strict": true, // Включаем строгий режим TypeScript (рекомендуется)
-
-      "noImplicitAny": false,
-      "noEmitOnError": true,
-      "removeComments": false,
-      "sourceMap": false,
-      //"target": "es5",
-      "outDir": "dist",
-      "checkJs": false // Или true, если хотите проверку JS-файлов
-    },
-    "include": [
-      "src/*"
-    ]
-  }
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"], // Новые версии
+    "module": "ES6",
+    "strict": true,
+    "noImplicitAny": false, // Лучше поставить true для лучшей типизации, нужно будет типизировать все any
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": false, // Не понял зачем они нужны, типо для отладки
+    "outDir": "dist",
+    "checkJs": true,
+    "incremental": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

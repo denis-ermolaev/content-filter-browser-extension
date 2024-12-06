@@ -1,12 +1,11 @@
 // @ts-nocheck
 // @ts-ignore
-const path = require('path');
+const path = require('path'); //Раздражает это предупреждение, как его отключить ?
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-
 module.exports = {
-  mode: 'development',
-  devtool: 'cheap-module-source-map',
+  mode: 'development', // Код лучший для отладки, для продакшена другой режим
+  devtool: false, // Без мапингов быстрее всего
   entry: {
     background: './src/background.js',
     'contentScripts/contentEnd': './src/contentScripts/contentEnd.js',
@@ -19,20 +18,21 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: 'ts-loader', // Typescript компилятор(Есть вроде более быстрые, чем этот)
         exclude: /node_modules/,
       },
     ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    alias: {
+    alias: { // Поменять импорты в ts
       'languageDetector': path.resolve(__dirname, 'src/efficient-language-detector-js-main/languageDetector.js'),
     },
   },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true, // Вроде отчищает папку dist от лишнего и старого
   },
   cache: {
     type: 'filesystem',

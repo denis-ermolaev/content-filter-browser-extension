@@ -192,9 +192,9 @@ class CacheSite { // TODO: Нужно чтобы кэш сохранял рез�
  * Обрабатывает их и даёт ответ
  */
 class MessageHandler {
-  request:any;
-  sender:any;
-  sendResponse:Function;
+  request:{ [key: string]: any };
+  sender:any; //chrome.runtime.MessageSender; - нужно поменять и исправить появляющиеся ошибки
+  sendResponse: any; //(response: any) => void; - нужно поменять и исправить появляющиеся ошибки
   settings:Settings;
   cache:CacheSite;
   constructor(request:any, sender: any, sendResponse: Function,settings: Settings, cache: CacheSite) {
