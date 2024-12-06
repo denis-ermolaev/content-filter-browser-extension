@@ -1,12 +1,17 @@
-import eld from './src/efficient-language-detector-js-main/src/languageDetector.js';
+// import { OurPromise } from '../typescript/types';
+// private logging: Record<string, boolean>; - Приватный атрибут
+
+// string - строка
+// number - число
+// Record<string, boolean>; - объект ключ-значение
 
 
-//
-// ! Объявление классов
-//
-
-
+/**
+ * Класс для логирования
+ * Можно отключить/включить логгирование для разных модулей
+ */
 class Logger {
+  logging: Record<string, boolean>;
   constructor() {
     this.logging = {
       Data_science: false,
@@ -17,15 +22,25 @@ class Logger {
       caches: false
     }
   }
-  log(module_name, ...args) {
+  /**
+   * Вывести args в консоль, для
+   * модуля modul_name
+   * @param module_name 
+   * @param args 
+   */
+  log(module_name: string, ...args: any[]): void {
     if (this.logging[module_name]) {
       console.log(...args);
     }
   }
 }
 
-
 class Settings {
+  blockpage: string;
+  whitelist: string;
+  limit: number;
+  blockvals: Record<number,string>;
+  ready: boolean;
   constructor() {
     this.blockpage = ""; // "домен_сайта|домен_другого_сайта"
     this.whitelist = "";
@@ -37,9 +52,9 @@ class Settings {
     };
     this.ready = false; // Готовность, чтобы не загружать настройки несколько раз
   }
-  
-  getFromStorage() { // не async т.к возвращает промис явно (в чём отличие ?)
-    return new Promise((resolve, reject) => {
+
+  getFromStorage(): Promise<Record<string, any>> { // не async т.к возвращает промис явно (в чём отличие ?)
+    return new Promise ((resolve, reject) => {
       chrome.storage.local.get(null, (items) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError); //resolve - успех, reject - неудача
@@ -76,7 +91,7 @@ class Settings {
   }
 
   //Загрузка настроек из пресета
-  loadFromPreset() {
+  loadFromPreset(): Promise<void> {
     logger.log("settings", "Метод loadFromPreset из класса Settings запущен")
     return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
       try {
@@ -84,7 +99,7 @@ class Settings {
         const preset = await response.json();
 
         const blockvals = {};
-        preset.blockvals.forEach(item => {
+        preset.blockvals.forEach((item: {name:number | string, value:any}) => {
           blockvals[item.name] = item.value;
         });
 
@@ -103,7 +118,7 @@ class Settings {
     });
   }
   
-  async save() {
+  async save(): Promise<void> {
     logger.log("settings", "Метод save из класса Settings запущен")
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({
@@ -123,33 +138,41 @@ class Settings {
   }
 }
 
-// Класс для кэширования результатов сканирования
-class Cache { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
+
+class CacheSite { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
+  cache: Object;
   constructor() {
     this.cache = {};
   }
 
   // Получение результата из кэша
-  get(url) {
+  get(url:string) {
     return this.cache[url];
   }
 
   // Сохранение результата в кэш
-  set(url, result) {
+  set(url:string, result:Object) {
     this.cache[url] = result;
     console.log(`Cached result for ${url}:`, result);
   }
 
   // Проверка наличия результата в кэше
-  has(url) {
+  has(url:string) {
     const hasResult = this.cache.hasOwnProperty(url);
     console.log(`Cache has result for ${url}:`, hasResult);
     return hasResult;
   }
 }
 
+
+
 class MessageHandler {
-  constructor(request, sender, sendResponse,settings, cache) {
+  request:any;
+  sender:any;
+  sendResponse:Function;
+  settings:Settings;
+  cache:CacheSite;
+  constructor(request:any, sender: any, sendResponse: Function,settings: Settings, cache: CacheSite) {
     this.request = request; // {message: 'message', ...} - принятое сообщение
     this.sender = sender // Информация о вкладки, её id(sender.tab.id), статус, активность url(sender.tab.url)
     this.sendResponse = sendResponse // Ф-я для отправки сообщения обратно. Синтаксис sendResponse(массив_или_объект)
@@ -165,34 +188,38 @@ class MessageHandler {
       } else {
         this.sendResponse({ error: "Unknown message type or missing pageText" });
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error processing message:", error);
       this.sendResponse({ error: error.message });
     }
   }
   async sendPageText_processing() {
     logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
-    const result_scan = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
-    let score = result_scan[0];
-    let foundWords = result_scan[1];
+    const result_scan: Object = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
+    let score: number = result_scan[0];
+    let foundWords: Object = result_scan[1];
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
 
     // Обработка языка
     let language = 'unknown';
-    if (this.request.pageText.split(' ').length > 30){
-      language = eld.detect(this.request.pageText).language
-    }
-    logger.log('sendPageText_processing',"Язык: ", language);
-    logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
-
-    if (!( ['ru', 'en', 'unknown'].includes(language) )) {
-      await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
-    } else if (score > this.settings.limit) {
+    //if (this.request.pageText.split(' ').length > 30){
+    //  language = eld.detect(this.request.pageText).language
+    //}
+    //logger.log('sendPageText_processing',"Язык: ", language);
+    //logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
+    if (score > this.settings.limit) {
       await this.update_on_blocking_page("Block page by scan", score, foundWords, language)
     } else {
       this.sendResponse({ status: "success", score });
     }
+    //if (!( ['ru', 'en', 'unknown'].includes(language) )) {
+    //  await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
+    //} else if (score > this.settings.limit) {
+    //  await this.update_on_blocking_page("Block page by scan", score, foundWords, language)
+    //} else {
+    //  this.sendResponse({ status: "success", score });
+    //}
   }
   // Обработка сообщения о блокировки видео из contentVideo.js
   checkWhitelistStatus_processing() {
@@ -208,7 +235,7 @@ class MessageHandler {
     }
   }
 
-  update_on_blocking_page(status='',score=0,foundWords={}, language = 'unknown') {
+  update_on_blocking_page(status='',score=0,foundWords={}, language = 'unknown'):Promise<void> {
     return new Promise((resolve, reject) => {
       chrome.tabs.update(this.sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
         chrome.storage.local.set({ status: status, score, foundWords, language }, () => {
@@ -224,19 +251,12 @@ class MessageHandler {
 //
 // ! Обслуживающие функции
 //
-
-function getDomain(url) {
-  // Получение домена из url
-  try {
-    const urlObj = new URL(url);
-    return urlObj.hostname;
-  } catch (error) {
-    console.error("Ошибка разбора URL:", error);
-    return null; // Или другое значение по умолчанию
-  }
+function getDomain(url:string):string {
+  const urlObj = new URL(url);
+  return urlObj.hostname;
 }
 
-async function scanPageText(text, settings) {
+async function scanPageText(text:string, settings:Settings) {
   // Сканирование страницы
   if (typeof text !== 'string') {
     throw new Error("Provided text is not a string");
@@ -249,7 +269,7 @@ async function scanPageText(text, settings) {
   for (const [key, value] of Object.entries(settings.blockvals)) {
     if (value) {
       const regex = new RegExp(value, 'gi');
-      let match;
+      let match: any[] | null;
       while ((match = regex.exec(text)) !== null) {
         score += parseInt(key);
         if (foundWords[parseInt(key)]) {
@@ -271,12 +291,7 @@ async function scanPageText(text, settings) {
   return [score, foundWords];
 }
 
-
-//
-// ! Объявление переменных
-//
-
 const logger = new Logger();
 
-// Экспортируем классы, чтобы они были доступны в importScripts
-export { Settings, Cache, MessageHandler, logger };
+
+export { Settings, CacheSite, MessageHandler, logger };

@@ -5,11 +5,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: {
     background: './src/background.js',
-    contentScript1: './src/contentScripts/contentEnd.js',
-    contentScript2: './src/contentScripts/contentStart.js',
-    contentScript3: './src/contentScripts/contentVideo.js',
-    options: './src/pages/Options/index.js',
-    blockpage: './src/pages/BlockPage/index.js',
+    'contentScripts/contentEnd': './src/contentScripts/contentEnd.js',
+    'contentScripts/contentStart': './src/contentScripts/contentStart.js',
+    'contentScripts/contentVideo': './src/contentScripts/contentVideo.js',
+    'pages/Options/index': './src/pages/Options/index.js',
+    'pages/BlockPage/index': './src/pages/BlockPage/index.js',
   },
   module: {
     rules: [
@@ -30,11 +30,13 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'pages/Options/index.html', to: 'pages/Options/index.html' },
-        { from: 'pages/Options/index.css', to: 'pages/Options/index.css' },
-        { from: 'pages/BlockPage/index.html', to: 'pages/BlockPage/index.html' },
-        { from: 'pages/BlockPage/style.css', to: 'pages/BlockPage/style.css' },
-        { from: 'efficient-language-detector-js-main', to: 'efficient-language-detector-js-main' },
+        { from: 'src/pages/Options/index.html', to: 'pages/Options/index.html' },
+        { from: 'src/pages/Options/index.css', to: 'pages/Options/index.css' },
+        { from: 'src/pages/BlockPage/index.html', to: 'pages/BlockPage/index.html' },
+        { from: 'src/pages/BlockPage/style.css', to: 'pages/BlockPage/style.css' },
+        { from: 'src/manifest.json', to: 'manifest.json' },
+        { from: 'src/utils', to: 'utils/' },
+        { from: 'src/assets', to: 'assets/' },
         // добавьте другие HTML-страницы, которые нужно скопировать
       ],
     }),

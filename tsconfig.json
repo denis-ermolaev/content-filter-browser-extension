@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
-      "outDir": "./dist/",
-      "noImplicitAny": true,
-      "module": "es6",
+      "noImplicitAny": false,
+      "noEmitOnError": true,
+      "removeComments": false,
+      "sourceMap": true,
       "target": "es5",
-      "jsx": "react",
-      "allowJs": true,
-      "moduleResolution": "node"
-    }
+      "outDir": "dist"
+    },
+    "include": [
+      "scr/",
+    ]
   }
