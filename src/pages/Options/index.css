@@ -1,0 +1,77 @@
+body {
+  height:100vh;
+  width :100vw;
+  display: grid;
+  justify-items: center;
+  margin: 0;
+  background-color: #a9a9a9;
+}
+a {
+  color: rgb(36, 36, 36);
+}
+.all_conteiner {
+  width: 500px;
+  background-color: rgba(142, 142, 142, 0.687);
+  padding: 20px;
+  box-shadow: 0 2px 16px 1px #454545;
+}
+.nav-list {
+  border: 1px solid rgba(0, 0, 0, 0.155);
+  background-color: rgba(0, 0, 0, 0.103);
+  display: grid;
+  grid-template-columns: repeat(4 , auto);
+  align-items: center;
+}
+img {
+  justify-self: end;
+  border-radius: 15px;
+}
+.form {
+  display: grid;
+  gap:10px;
+}
+.submit-input {
+  justify-self: center;
+}
+input {
+  background-color: rgb(192, 192, 192);
+}
+.submit-import, .export-settings, .submit-input {
+  background-color: rgb(134, 134, 134);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 8px 1px #454545;
+  cursor: pointer;
+}
+.file-upload-input::-webkit-file-upload-button {
+  background-color: rgb(134, 134, 134);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 8px 1px #454545;
+  cursor: pointer;
+
+}
+.im-ex-conteiner {
+  display: flex;
+  flex-direction: column;
+}
+.import-settings-form {
+  border: 1px solid black;
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+}
+.export-settings {
+  border: 1px solid black;
+  align-self: center;
+  margin: 15px;
+}
+.main-footer {
+  border: 1px solid black;
+  background-color: rgba(0, 0, 0, 0.103);
+}
+footer p {
+  margin: 20px;
+}

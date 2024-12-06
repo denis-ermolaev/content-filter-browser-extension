@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>Options</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="all_conteiner">
+    <header>
+      <ul class="nav-list">
+        <img src="../../assets/icons/48.png">
+      <h1 class="main-header"><b>Options</b></h1>
+    <a href="#">About</a>
+    <a href="#">GitHub</a>
+      </ul>
+    </header>
+    <div class="main-options">
+      <p>It is not advisable to change the keyword settings, 
+        if you want to do this, you can export the settings, change them and import them again.
+         <em> In any case, we recommend exporting the settings and saving them</em> </p>
+         <p>Здесь белый и чёрный список</p>
+      <form class="form">
+        <input
+          class="whitelist-input"
+          type="text"
+          name="whitelist"
+          placeholder="whitelist"
+          required
+        />
+        <input
+          class="blocklist-input"
+          type="text"
+          name="blocklist"
+          placeholder="blocklist"
+          required
+        />
+        <input class="submit-input" type="submit" value="Отправить" />
+      </form>
+      <p>Тут экспорт и импорт</p>
+    <div class="im-ex-conteiner">
+    <form class="import-settings-form">
+      <input
+        class="file-upload-input"
+        id="file-upload"
+        type="file"
+        value="Экспорт JSON"
+        placeholder="Nbb"
+      />
+      <input class="submit-import" type="submit" value="Импорт JSON" />
+    </form>
+      <input class="export-settings" type="button" value="Экспорт JSON" />
+    </div>
+  </div>
+  </body>
+  <footer class="main-footer"><p>Content-Filter Extention</p></footer>
+</html>
