@@ -1,9 +1,3 @@
-// import { OurPromise } from '../typescript/types';
-// private logging: Record<string, boolean>; - Приватный атрибут
-
-// string - строка
-// number - число
-// Record<string, boolean>; - объект ключ-значение
 import eld from 'languageDetector';
 
 /**
@@ -35,6 +29,9 @@ class Logger {
   }
 }
 
+/**
+ * Глобальные настройки
+ */
 class Settings {
   blockpage: string;
   whitelist: string;
@@ -52,7 +49,12 @@ class Settings {
     };
     this.ready = false; // Готовность, чтобы не загружать настройки несколько раз
   }
-
+  /**
+   * Получение из хранилища
+   * Позволяет использовать await
+   * Т.к chrome.storage.local.get - ф-я колбэк
+   * @returns Promise<Record<string, any>>
+   */
   getFromStorage(): Promise<Record<string, any>> { // не async т.к возвращает промис явно (в чём отличие ?)
     return new Promise ((resolve, reject) => {
       chrome.storage.local.get(null, (items) => {
@@ -65,7 +67,11 @@ class Settings {
     });
   }
   
-  // Загрузка из хранилища браузера chrome.storage.local
+  /**
+   * Загрузка настроек
+   * Из присета (если нету сохранение в хранилище)
+   * Из хранилища браузера
+   */
   async load() {
     logger.log("settings", "Метод load из класса Settings запущен")
     if (this.ready) {
@@ -90,7 +96,10 @@ class Settings {
     }
   }
 
-  //Загрузка настроек из пресета
+  /**
+   * Загрузка настроект из присета preset.json
+   * Первоначальная инициализация
+   */
   loadFromPreset(): Promise<void> {
     logger.log("settings", "Метод loadFromPreset из класса Settings запущен")
     return new Promise(async (resolve, reject) => { // Этот async дожидаться не надо, достаточно дождаться в общем промис
@@ -118,6 +127,10 @@ class Settings {
     });
   }
   
+  /**
+   * Сохранение настроек в хранилище
+   * Может использоваться при первоначально инициализации, а также на странице настроек (?)
+   */
   async save(): Promise<void> {
     logger.log("settings", "Метод save из класса Settings запущен")
     return new Promise((resolve, reject) => {
@@ -138,25 +151,33 @@ class Settings {
   }
 }
 
-
-class CacheSite { // Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
+/**
+ * Кэш должен сохранять результаты, чтобы каждый раз не сканировать страницы
+ */
+class CacheSite { // TODO: Нужно чтобы кэш сохранял результаты после перезапусков браузера и бэграунда, пока они обнуляются
   cache: Object;
   constructor() {
     this.cache = {};
   }
 
-  // Получение результата из кэша
+  /**
+   * Получение результата из кэша
+   */
   get(url:string) {
     return this.cache[url];
   }
 
-  // Сохранение результата в кэш
+  /**
+   * Сохранение результата в кэш
+   */
   set(url:string, result:Object) {
     this.cache[url] = result;
     console.log(`Cached result for ${url}:`, result);
   }
 
-  // Проверка наличия результата в кэше
+  /**
+   * Проверка наличия результата в кэше
+   */
   has(url:string) {
     const hasResult = this.cache.hasOwnProperty(url);
     console.log(`Cache has result for ${url}:`, hasResult);
@@ -165,7 +186,11 @@ class CacheSite { // Нужно чтобы кэш сохранял резуль�
 }
 
 
-
+/**
+ * Обработчик сообщений в бэграунде
+ * Экземпляр создаётся для каждого полученного сообщения
+ * Обрабатывает их и даёт ответ
+ */
 class MessageHandler {
   request:any;
   sender:any;
@@ -179,11 +204,20 @@ class MessageHandler {
     this.settings = settings
     this.cache = cache
   }
+  /**
+   * Определение типа сообщения и отправка соответсвующей ф-и на обработку
+   */
   async request_processing() {
     try {
-      if (this.request.message === "sendPageText" && typeof this.request.pageText === 'string') {
-        await this.sendPageText_processing()
-      } else if (this.request.message === "checkWhitelistStatus") {
+      if (this.request.message === "sendPageText" && typeof this.request.pageText === 'string') { // message === "sendPageText"
+        if (this.checkWhiteBlackList() === "InWhiteList") {
+          this.sendResponse({ status: "success" });
+        } else if (this.checkWhiteBlackList() === "InBlackList") {
+          await this.update_on_blocking_page("Block page by Black List")
+        } else {
+          await this.sendPageText_processing()
+        }
+      } else if (this.request.message === "checkWhitelistStatus") { // message === "checkWhitelistStatus"
         this.checkWhitelistStatus_processing()
       } else {
         this.sendResponse({ error: "Unknown message type or missing pageText" });
@@ -193,9 +227,13 @@ class MessageHandler {
       this.sendResponse({ error: error.message });
     }
   }
+  /**
+   * Обрабатывает сообщение с contentEnd
+   * message === "sendPageText"
+   */
   async sendPageText_processing() {
     logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
-    const result_scan: Object = await scanPageText(this.request.pageText, this.settings); // [score, foundWords]
+    const result_scan: Object = await scanPageText(this.request.pageText, this.settings.limit, this.settings.blockvals); // [score, foundWords]
     let score: number = result_scan[0];
     let foundWords: Object = result_scan[1];
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
@@ -216,20 +254,36 @@ class MessageHandler {
       this.sendResponse({ status: "success", score });
     }
   }
-  // Обработка сообщения о блокировки видео из contentVideo.js
+  /**
+   * Обработка сообщения о блокировки видео из contentVideo.js
+   * message === "checkWhitelistStatus"
+   */
   checkWhitelistStatus_processing() {
     logger.log('checkWhitelistStatus_processing', "Запрос на блокировку видео получен, проверяется белый список");
-    const url_domen = getDomain(this.sender.tab.url);
     logger.log('checkWhitelistStatus_processing', this.settings.whitelist);
-    logger.log('checkWhitelistStatus_processing', "Внешний вид url", url_domen);
-    if (this.settings.whitelist.split('|').includes(url_domen)) {
+    if (this.checkWhiteBlackList() === "InWhiteList") {
       logger.log('checkWhitelistStatus_processing', "Блокировка видео не возможна inWhiteList");
       this.sendResponse({ status: "inWhiteList" });
     } else {
       this.sendResponse({ status: "blockingVideo" });
     }
   }
-
+  /**
+   * Проверка в белом или чёрном списке или нет
+   */
+  checkWhiteBlackList() {
+    if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
+      return "InWhiteList"
+    } else if  (this.settings.blockpage.split('|').includes(getDomain(this.sender.tab.url))) {
+      return "InBlackList"
+    } else {
+      return "false"
+    }
+  }
+  /**
+   * Перенаправляет текущую вкладку браузера на страницу блокировки
+   * pages/BlockPage/index.html
+   */
   update_on_blocking_page(status='',score=0,foundWords={}, language = 'unknown'):Promise<void> {
     return new Promise((resolve, reject) => {
       chrome.tabs.update(this.sender.tab.id, { url: 'pages/BlockPage/index.html' }, () => {
@@ -246,22 +300,22 @@ class MessageHandler {
 //
 // ! Обслуживающие функции
 //
+/**
+ * Получение домена www.google.com из url
+ */
 function getDomain(url:string):string {
   const urlObj = new URL(url);
   return urlObj.hostname;
 }
 
-async function scanPageText(text:string, settings:Settings) {
-  // Сканирование страницы
-  if (typeof text !== 'string') {
-    throw new Error("Provided text is not a string");
-  }
-
-  const limit = settings.limit || 160; // При превышении сканирование заканчивается 
+/**
+ * Сканирование текста странице на основе слов-весов
+ */
+async function scanPageText(text:string, limit_score: number, settings_blockvals: Settings["blockvals"]) {
+  const limit = limit_score; // При превышении сканирование заканчивается 
   let score = 0;
-  let foundWords = {}; // Словарь для сохранения найденных слов
-
-  for (const [key, value] of Object.entries(settings.blockvals)) {
+  let foundWords = {};
+  for (const [key, value] of Object.entries(settings_blockvals)) {
     if (value) {
       const regex = new RegExp(value, 'gi');
       let match: any[] | null;
@@ -282,10 +336,12 @@ async function scanPageText(text:string, settings:Settings) {
       }
     }
   }
-
   return [score, foundWords];
 }
 
+//
+// ! Объявление переменных
+//
 const logger = new Logger();
 
 
