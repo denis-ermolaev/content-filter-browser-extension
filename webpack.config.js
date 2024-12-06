@@ -1,3 +1,5 @@
+// @ts-nocheck
+// @ts-ignore
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -22,10 +24,16 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      'languageDetector': path.resolve(__dirname, 'src/efficient-language-detector-js-main/languageDetector.js'),
+    },
   },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+  },
+  cache: {
+    type: 'filesystem',
   },
   plugins: [
     new CopyWebpackPlugin({

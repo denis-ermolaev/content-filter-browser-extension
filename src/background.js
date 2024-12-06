@@ -1,4 +1,4 @@
-import { Settings, Cache, MessageHandler, logger } from './settings.js';
+import { Settings, CacheSite, MessageHandler, logger } from './settings';
 
 
 // Включение - выключение логгирования
@@ -14,7 +14,7 @@ logger.logging['Data_science'] = true // Оставлять включенным
 
 const settings = new Settings();
 logger.log('general_logging',settings) // Пустные настройки
-const cache = new Cache();
+const cache = new CacheSite();
 
 
 // Прослушивание событие отправки сообщений на бэграунд. Получает запросы с других скриптов

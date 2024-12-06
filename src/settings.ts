@@ -4,7 +4,7 @@
 // string - строка
 // number - число
 // Record<string, boolean>; - объект ключ-значение
-
+import eld from 'languageDetector';
 
 /**
  * Класс для логирования
@@ -201,6 +201,7 @@ class MessageHandler {
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
 
+    console.log(eld.detect(this.request.pageText))
     // Обработка языка
     let language = 'unknown';
     //if (this.request.pageText.split(' ').length > 30){
