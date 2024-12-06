@@ -201,26 +201,20 @@ class MessageHandler {
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
 
-    console.log(eld.detect(this.request.pageText))
-    // Обработка языка
     let language = 'unknown';
-    //if (this.request.pageText.split(' ').length > 30){
-    //  language = eld.detect(this.request.pageText).language
-    //}
-    //logger.log('sendPageText_processing',"Язык: ", language);
-    //logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
-    if (score > this.settings.limit) {
+    if (this.request.pageText.split(' ').length > 30){
+      language = eld.detect(this.request.pageText).language
+    }
+    logger.log('sendPageText_processing',"Язык: ", language);
+    logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
+
+    if (!( ['ru', 'en', 'unknown'].includes(language) )) {
+      await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
+    } else if (score > this.settings.limit) {
       await this.update_on_blocking_page("Block page by scan", score, foundWords, language)
     } else {
       this.sendResponse({ status: "success", score });
     }
-    //if (!( ['ru', 'en', 'unknown'].includes(language) )) {
-    //  await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
-    //} else if (score > this.settings.limit) {
-    //  await this.update_on_blocking_page("Block page by scan", score, foundWords, language)
-    //} else {
-    //  this.sendResponse({ status: "success", score });
-    //}
   }
   // Обработка сообщения о блокировки видео из contentVideo.js
   checkWhitelistStatus_processing() {
