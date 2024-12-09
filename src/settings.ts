@@ -13,7 +13,8 @@ class Logger {
       sendPageText_processing: false,
       checkWhitelistStatus_processing: false,
       settings: false,
-      caches: false
+      caches: false,
+      time_count:false
     }
   }
   /**
@@ -27,6 +28,15 @@ class Logger {
       console.log(...args);
     }
   }
+  async decoratorTimeCount(func:Function,...args:any[]){ 
+    let starttime = performance.now();
+    let result:any[] = await func(...args);
+    let resultTime = performance.now() - starttime;
+    this.log('time_count',`Время работы функции: ${resultTime} миллисекунд`)
+    //Время работы функции: 900.2999999523163 миллисекунд
+    return result
+  }
+ 
 }
 
 /**
@@ -233,7 +243,7 @@ class MessageHandler {
    */
   async sendPageText_processing() {
     logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
-    const result_scan: Object = await scanPageText(this.request.pageText, this.settings.limit, this.settings.blockvals); // [score, foundWords]
+    const result_scan: Object = await logger.decoratorTimeCount(scanPageText,this.request.pageText, this.settings.limit, this.settings.blockvals); // [score, foundWords]
     let score: number = result_scan[0];
     let foundWords: Object = result_scan[1];
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
