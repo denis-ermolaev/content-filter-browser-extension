@@ -9,7 +9,7 @@
     "removeComments": false,
     "sourceMap": false, // Не понял зачем они нужны, типо для отладки
     "outDir": "dist",
-    "checkJs": true,
+    "checkJs": false, // Душить ли и за .js файлы ?
     "incremental": true
   },
   "include": [

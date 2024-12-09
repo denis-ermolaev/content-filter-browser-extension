@@ -10,7 +10,7 @@ import { Settings, CacheSite, MessageHandler, logger } from './settings';
 //logger.logging['settings'] = true // Отладка класса настроек
 //logger.logging['caches'] = true // Отладка кэша
 //logger.logging['time_count'] = true
-logger.logging['Data_science'] = true // Оставлять включенным, используется для сбора тектов
+//logger.logging['Data_science'] = true // Оставлять включенным, используется для сбора тектов
 
 
 const settings = new Settings();

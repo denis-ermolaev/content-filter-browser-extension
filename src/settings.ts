@@ -1,5 +1,9 @@
 import eld from 'languageDetector';
 
+//
+// ! Объявление классов
+//
+
 /**
  * Класс для логирования
  * Можно отключить/включить логгирование для разных модулей
@@ -28,12 +32,14 @@ class Logger {
       console.log(...args);
     }
   }
-  async decoratorTimeCount(func:Function,...args:any[]){ 
+  /**
+   * Ф-я декоратор для замера скорости выполнения других ф-й
+   */
+  async decoratorTimeCount(func:Function,name_func:string,...args:any[any]):Promise<any>{ 
     let starttime = performance.now();
-    let result:any[] = await func(...args);
+    let result : any = await func(...args);
     let resultTime = performance.now() - starttime;
-    this.log('time_count',`Время работы функции: ${resultTime} миллисекунд`)
-    //Время работы функции: 900.2999999523163 миллисекунд
+    this.log('time_count',`Время работы функции - ${name_func}: ${resultTime.toFixed(2)} миллисекунд`)
     return result
   }
  
@@ -243,19 +249,28 @@ class MessageHandler {
    */
   async sendPageText_processing() {
     logger.log('Data_science', this.request.pageText) // Не печатать, если сайт в белом списки ??
-    const result_scan: Object = await logger.decoratorTimeCount(scanPageText,this.request.pageText, this.settings.limit, this.settings.blockvals); // [score, foundWords]
-    let score: number = result_scan[0];
-    let foundWords: Object = result_scan[1];
+    const start = performance.now();
+    let scan_promise = logger.decoratorTimeCount(scanPageText,"scanPageText",this.request.pageText, this.settings.limit, this.settings.blockvals); // [score, foundWords]
+    //let score: number = result_scan[0];
+    //let foundWords: Object = result_scan[1];
+    let text_for_language_detect:string = processText(this.request.pageText);
+    let language_promise = logger.decoratorTimeCount(wrappedSyncFunction,"eld.detect",eld.detect,text_for_language_detect);
+    //const result_promise = await logger.decoratorTimeCount(Promise.all,"Promise.all",[scan_promise,language_promise])
+    const result_promise = await logger.decoratorTimeCount(wrappedPromiseAll,"Promise.all(ожидание)",[language_promise, scan_promise])
+    const end = performance.now();
+    logger.log('time_count', `Время работы Promise.all(общее): ${end - start} миллисекунд`);
+    logger.log('sendPageText_processing', "result_promise",result_promise)
+    
+    let language = result_promise[0].language;
+    let score: number = result_promise[1][0];
+    let foundWords: Object = result_promise[1][1];
+    if (text_for_language_detect.split(' ').length < 20){
+      language = 'unknown';
+    }
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
-
-    let language = 'unknown';
-    if (this.request.pageText.split(' ').length > 30){
-      language = eld.detect(this.request.pageText).language
-    }
-    logger.log('sendPageText_processing',"Язык: ", language);
+    logger.log('sendPageText_processing', "Detect language complete. language:", language);
     logger.log('sendPageText_processing',"Длинна текста: ", this.request.pageText.split(' ').length);
-
     if (!( ['ru', 'en', 'unknown'].includes(language) )) {
       await this.update_on_blocking_page("Block page by language detect", score, foundWords, language)
     } else if (score > this.settings.limit) {
@@ -310,6 +325,7 @@ class MessageHandler {
 //
 // ! Обслуживающие функции
 //
+
 /**
  * Получение домена www.google.com из url
  */
@@ -349,6 +365,33 @@ async function scanPageText(text:string, limit_score: number, settings_blockvals
   return [score, foundWords];
 }
 
+/**
+ * Обёртка(декоратор) делающая из синхронной ф-и -> асинхронную
+ */
+function wrappedSyncFunction(syncFunction:Function, ...args:any) {
+    return Promise.resolve(syncFunction(...args));
+}
+
+/**
+ * Обёртка(декоратор) позволяющие сделать замер скорости над Promise.all
+ * Измерить именно ожидание
+ */
+async function wrappedPromiseAll(array_promise:Array<Promise<any>>) {
+  return await Promise.all(array_promise)
+}
+
+/**
+ * Подготовка текста к анализу языка
+ */
+function processText(text: string): string {
+  // Удаление знаков препинания
+  const cleanedText = text.replace(/[.,?!;:'"(){}]/g, '');
+  // Разделение слов, идущих с большой буквы
+  const result = cleanedText
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // Разделение слов с заглавной буквы
+      .replace(/[_-]+/g, ' '); // Замена подчеркиваний и дефисов на пробелы
+  return result.trim(); // Удаление лишних пробелов в начале и в конце
+}
 //
 // ! Объявление переменных
 //
