@@ -258,12 +258,12 @@ class MessageHandler {
     }
   }
   sendRedButton_processing() {
-    console.log(this.request.num_minut);
+    //console.log(this.request.num_minut);
     this.settings.red_button = true;
     this.settings.red_button_timer = this.request.num_minut;
-    chrome.alarms.create("myTimer", {
-      delayInMinutes: 1 / 60, // 1 секунда
-      periodInMinutes: 1 / 60, // 1 секунда
+    chrome.alarms.create("Red_button_timer", {
+      delayInMinutes: 1, // 1 / 60 - 1 секунда
+      periodInMinutes: 1,
     });
     // Перезагружаем все вкладки
     chrome.tabs.query({}, (tabs) => {
@@ -278,7 +278,7 @@ class MessageHandler {
         }
       });
     });
-    this.sendResponse({ status: "success" });
+    this.sendResponse({ status: "success", duration:this.settings.red_button_timer });
   }
   /**
    * Обрабатывает сообщение с contentEnd

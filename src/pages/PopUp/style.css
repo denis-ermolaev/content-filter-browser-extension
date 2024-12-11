@@ -1,10 +1,23 @@
+body {
+    margin: 0;
+}
 #form_red_button {
     display: grid;
     align-items: center;
+    border: 1px solid black;
+    padding: 2px;
     width: 200px;
-    margin: 20px;
+    margin: 4px;
+}
+
+#botton_red {
+    margin: 3px auto;
 }
 
 input {
+    margin: 3px;
+}
+
+p {
     margin: 3px;
 }

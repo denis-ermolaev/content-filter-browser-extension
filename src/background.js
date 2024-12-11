@@ -43,35 +43,9 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
   }
 });
 
-
-// (async() => {
-//   setInterval(() => {
-//     if (settings.red_button) {
-//       if (settings.red_button_timer > 0) {
-//         settings.red_button_timer--
-//       } else {
-//         settings.red_button = false
-//       }
-//     }
-//     console.log(settings.red_button_timer)
-//   },1000);
-// })();
-
-// chrome.runtime.onSuspend.addListener(function() {
-//   (async() => {
-//     await settings.save()
-//   })();
-// });
-
-// Создать таймер, который срабатывает каждую секунду
-// chrome.alarms.create('myTimer', {
-//   delayInMinutes: 1 / 60, // 1 секунда
-//   periodInMinutes: 1 / 60, // 1 секунда
-// });
-
 // Обработчик срабатывания таймера
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'myTimer') {
+  if (alarm.name === 'Red_button_timer') {
     if (settings.red_button) {
       if (settings.red_button_timer > 0) {
         settings.red_button_timer--;
@@ -82,10 +56,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       }
       //console.log(settings.red_button_timer);
     } else {
-      chrome.alarms.clear('myTimer');
+      chrome.alarms.clear('Red_button_timer');
     }
   }
 });
-
-//
-//chrome.alarms.clear('myTimer');
