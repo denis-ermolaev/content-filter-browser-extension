@@ -1,0 +1,10 @@
+#form_red_button {
+    display: grid;
+    align-items: center;
+    width: 200px;
+    margin: 20px;
+}
+
+input {
+    margin: 3px;
+}
