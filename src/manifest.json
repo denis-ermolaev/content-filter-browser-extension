@@ -10,11 +10,14 @@
   },
   
   "permissions": [
-    "storage"
+    "storage", "alarms"
   ],
   "background": {
     "service_worker": "background.js",
      "type": "module"
+  },
+  "action": {
+    "default_popup": "pages/PopUp/index.html"
   },
   "options_ui": {
     "page": "pages/Options/index.html",

@@ -75,3 +75,8 @@ input {
 footer p {
   margin: 20px;
 }
+
+.red_button {
+  text-align: center;
+  padding: 20px;
+}

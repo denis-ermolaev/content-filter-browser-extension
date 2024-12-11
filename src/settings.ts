@@ -54,6 +54,8 @@ class Settings {
   limit: number;
   blockvals: Record<number,string>;
   ready: boolean;
+  red_button: boolean;
+  red_button_timer: number;
   constructor() {
     this.blockpage = ""; // "домен_сайта|домен_другого_сайта"
     this.whitelist = "";
@@ -64,6 +66,8 @@ class Settings {
       100: "", 120: "", 130: "", 150: ""
     };
     this.ready = false; // Готовность, чтобы не загружать настройки несколько раз
+    this.red_button = false
+    this.red_button_timer = 0
   }
   /**
    * Получение из хранилища
@@ -103,7 +107,9 @@ class Settings {
               blockpage: items_from_storage['blockpage'], 
               blockvals: items_from_storage['blockvals'],
               limit: items_from_storage['limit'],
-              whitelist: items_from_storage['whitelist']
+              whitelist: items_from_storage['whitelist'],
+              red_button: items_from_storage['red_button'],
+              red_button_timer: items_from_storage['red_button_timer']
           };
           Object.assign(this, data_for_setting_load);
           this.ready = true;
@@ -132,6 +138,8 @@ class Settings {
         this.limit = preset.limit;
         this.whitelist = preset.whitelist;
         this.blockvals = blockvals;
+        this.red_button = false;
+        this.red_button_timer = 0;
 
         // Сохраняем начальные настройки в chrome.storage.local
         await this.save();
@@ -154,7 +162,9 @@ class Settings {
         blockpage: this.blockpage,
         blockvals: this.blockvals,
         limit: this.limit,
-        whitelist: this.whitelist
+        whitelist: this.whitelist,
+        red_button: this.red_button,
+        red_button_timer: this.red_button_timer
       }, () => {
         if (chrome.runtime.lastError) {
           console.error('Error saving to chrome.storage.local:', chrome.runtime.lastError);
@@ -235,6 +245,10 @@ class MessageHandler {
         }
       } else if (this.request.message === "checkWhitelistStatus") { // message === "checkWhitelistStatus"
         this.checkWhitelistStatus_processing()
+      } else if (this.request.message === "sendCheckStatusRedButton") {
+        this.sendResponse({ status: this.settings.red_button , duration:this.settings.red_button_timer});
+      } else if (this.request.message === "sendRedButton") {
+          this.sendRedButton_processing()
       } else {
         this.sendResponse({ error: "Unknown message type or missing pageText" });
       }
@@ -242,6 +256,29 @@ class MessageHandler {
       console.error("Error processing message:", error);
       this.sendResponse({ error: error.message });
     }
+  }
+  sendRedButton_processing() {
+    console.log(this.request.num_minut);
+    this.settings.red_button = true;
+    this.settings.red_button_timer = this.request.num_minut;
+    chrome.alarms.create("myTimer", {
+      delayInMinutes: 1 / 60, // 1 секунда
+      periodInMinutes: 1 / 60, // 1 секунда
+    });
+    // Перезагружаем все вкладки
+    chrome.tabs.query({}, (tabs) => {
+      if (!tabs) {
+        console.error('Не удалось получить вкладки.');
+        return;
+      }
+    
+      tabs.forEach((tab) => {
+        if (tab.id !== undefined) {
+          chrome.tabs.reload(tab.id, undefined); // Указание undefined для колбэка
+        }
+      });
+    });
+    this.sendResponse({ status: "success" });
   }
   /**
    * Обрабатывает сообщение с contentEnd
@@ -297,12 +334,20 @@ class MessageHandler {
    * Проверка в белом или чёрном списке или нет
    */
   checkWhiteBlackList() {
-    if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
-      return "InWhiteList"
-    } else if  (this.settings.blockpage.split('|').includes(getDomain(this.sender.tab.url))) {
-      return "InBlackList"
+    if (this.settings.red_button) {
+      if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
+        return "InWhiteList"
+      } else {
+        return "InBlackList"
+      }
     } else {
-      return "false"
+      if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
+        return "InWhiteList"
+      } else if  (this.settings.blockpage.split('|').includes(getDomain(this.sender.tab.url))) {
+        return "InBlackList"
+      } else {
+        return "false"
+      }
     }
   }
   /**

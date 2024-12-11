@@ -13,6 +13,7 @@ module.exports = {
     'contentScripts/contentVideo': './src/contentScripts/contentVideo.js',
     'pages/Options/index': './src/pages/Options/index.js',
     'pages/BlockPage/index': './src/pages/BlockPage/index.js',
+    'pages/PopUp/index': './src/pages/PopUp/index.js',
   },
   module: {
     rules: [
@@ -46,7 +47,9 @@ module.exports = {
         { from: 'src/pages/BlockPage/style.css', to: 'pages/BlockPage/style.css' },
         { from: 'src/manifest.json', to: 'manifest.json' },
         { from: 'src/utils', to: 'utils/' },
-        { from: 'src/assets', to: 'assets/' },
+        { from: 'src/pages/PopUp/index.html', to: 'pages/PopUp/index.html' },
+        { from: 'src/pages/PopUp/style.css', to: 'pages/PopUp/style.css' },
+        { from: 'src/assets/', to: 'assets/' },
         // добавьте другие HTML-страницы, которые нужно скопировать
       ],
     }),
