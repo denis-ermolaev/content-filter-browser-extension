@@ -61,12 +61,29 @@ function blocking_images() {
 
 }
 
+function disableInputs() {
+  function inner_fun() {
+    const inputs = document.querySelectorAll("input, textarea");
+    inputs.forEach((input) => {
+      input.disabled = true;
+    });
+  }
+  inner_fun();
+  // Опционально: Запускаем скрипт повторно при изменении DOM (например, при динамической подгрузке контента)
+  const observer = new MutationObserver(inner_fun);
+  observer.observe(document, { // Исправленная строка: наблюдаем за document
+    childList: true,
+    subtree: true
+  });
+}
+
 chrome.runtime.sendMessage({ message: "checkWhitelistStatus" }, async (response) => {
 	console.log(response)
 	if (response.status === "blockingVideo") {
 		console.log("Блокировка видео началась, сайт не в белом списке")
 		beginNomovdo();
     blocking_images();
+    //disableInputs();
 	} else {
 		console.log("Сайт в белом списке, блокировки видео не будет")
 	}

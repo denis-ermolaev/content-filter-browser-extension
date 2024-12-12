@@ -335,15 +335,15 @@ class MessageHandler {
    */
   checkWhiteBlackList() {
     if (this.settings.red_button) {
-      if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
+      if (check_in_list(this.sender.tab.url, this.settings.whitelist)) {
         return "InWhiteList"
       } else {
         return "InBlackList"
       }
     } else {
-      if (this.settings.whitelist.split('|').includes(getDomain(this.sender.tab.url))) {
+      if (check_in_list(this.sender.tab.url, this.settings.whitelist)) {
         return "InWhiteList"
-      } else if  (this.settings.blockpage.split('|').includes(getDomain(this.sender.tab.url))) {
+      } else if  (check_in_list(this.sender.tab.url, this.settings.blockpage)) {
         return "InBlackList"
       } else {
         return "false"
@@ -374,9 +374,10 @@ class MessageHandler {
 /**
  * Получение домена www.google.com из url
  */
-function getDomain(url:string):string {
-  const urlObj = new URL(url);
-  return urlObj.hostname;
+function check_in_list(url: string, settings_whitelist: string): boolean {
+  const regex = new RegExp(settings_whitelist);
+  let match = url.match(regex);
+  return match !== null;
 }
 
 /**
@@ -443,4 +444,4 @@ function processText(text: string): string {
 const logger = new Logger();
 
 
-export { Settings, CacheSite, MessageHandler, logger };
+export { Settings, CacheSite, MessageHandler, logger, check_in_list };
