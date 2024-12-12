@@ -10,7 +10,7 @@
   },
   
   "permissions": [
-    "storage", "alarms"
+    "storage", "alarms", "tabs"
   ],
   "background": {
     "service_worker": "background.js",

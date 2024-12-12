@@ -4,12 +4,12 @@ import { Settings, CacheSite, MessageHandler, logger } from './settings';
 // Включение - выключение логгирования
 // * Синтаксис logger.log(module_name, то что нужно распечатать)
 // ! Выключать перед коммитом
-//logger.logging['general_logging'] = true // background.js
-//logger.logging['sendPageText_processing'] = true // Обработка сообщения sendPageText_processing с content_end.js
-//logger.logging['checkWhitelistStatus_processing'] = true // checkWhitelistStatus_processing с contentVideo.js
-//logger.logging['settings'] = true // Отладка класса настроек
+logger.logging['general_logging'] = true // background.js
+logger.logging['sendPageText_processing'] = true // Обработка сообщения sendPageText_processing с content_end.js
+logger.logging['checkWhitelistStatus_processing'] = true // checkWhitelistStatus_processing с contentVideo.js
+logger.logging['settings'] = true // Отладка класса настроек
 //logger.logging['caches'] = true // Отладка кэша
-//logger.logging['time_count'] = true
+logger.logging['time_count'] = true
 //logger.logging['Data_science'] = true // Оставлять включенным, используется для сбора тектов
 
 
@@ -58,5 +58,16 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     } else {
       chrome.alarms.clear('Red_button_timer');
     }
+  }
+});
+
+function getDomain(url) {
+  const urlObj = new URL(url);
+  return urlObj.hostname;
+}
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  if (changeInfo.audible && !( settings.whitelist.split('|').includes(getDomain(tab.url)))) {
+    // Если звук включен на вкладке, блокируем его
+    chrome.tabs.update(tabId, { muted: true });
   }
 });

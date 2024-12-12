@@ -16,14 +16,16 @@ chrome.runtime.sendMessage(
   { message: "sendPageText", pageText: pageText },
   async (response) => {
     if (response.error) {
-      console.error("Error sending page text:", response.error);
+      const errorMessage = result?.error ?? 'Произошла неизвестная ошибка';
+      console.error(errorMessage);
+      document.body.style.opacity = 1;
+      document.body.style.visibility = 'visible';
+      console.log('Содержимое страницы показано');
     } else {
       console.log("Page text sent successfully");
 
       document.body.style.opacity = 1;
       document.body.style.visibility = 'visible';
-      //document.body.classList.remove('page-hidden');
-      //document.body.classList.remove('page-hidden');
       console.log('Содержимое страницы показано');
     }
   }
