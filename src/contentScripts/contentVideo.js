@@ -36,24 +36,21 @@ function beginNomovdo() {
 	nomovdo();
 }
 function blocking_images() {
-  function replaceImageSources() {
-    //console.log("replaceImageSources called");
-    const images = document.querySelectorAll('img'); // Выбираем только нужные изображения
-    //console.log("Found images:", images.length);
-
-    images.forEach(image => {
-      //console.log("Processing image:", image);
-      // 1. Сохраняем оригинальный src (на всякий случай)
-      //image.dataset.originalSrc = image.src;
-
-      // 2. Удаляем изображение из DOM
-      image.remove(); 
-    });
+  function fun_remove() {
+    function remove_for_tag(tag) {
+      const elements = document.querySelectorAll(tag); // Выбираем только нужные изображения
+      //console.log("Found images:", images.length);
+      elements.forEach((el) => {
+        el.remove();
+      });
+    }
+    remove_for_tag('img');
+    remove_for_tag('canvas');
   }
 
-  replaceImageSources();
+  fun_remove();
   // Опционально: Запускаем скрипт повторно при изменении DOM (например, при динамической подгрузке контента)
-  const observer = new MutationObserver(replaceImageSources);
+  const observer = new MutationObserver(fun_remove);
   observer.observe(document, { // Исправленная строка: наблюдаем за document
     childList: true,
     subtree: true
