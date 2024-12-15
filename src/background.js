@@ -43,23 +43,43 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
   }
 });
 
+//Похоже можно удалить, ни разу не видел, чтобы оно отрабатывало
+chrome.alarms.get("Red_button_timer", (alarm) => {
+  (async() => {
+    await settings.load();
+    console.log(!alarm, settings.red_button);
+    if (!alarm && settings.red_button) {
+      console.log("Создание таймера Red_button_timer", alarm);
+      chrome.alarms.create("Red_button_timer", {
+        delayInMinutes: 1, // 1 / 60 - 1 секунда
+        periodInMinutes: 1,
+      });
+    } else {
+      console.log("Таймер с именем 'Red_button_timer' не будет создан.");
+    }
+  })();
+});
 // Обработчик срабатывания таймера
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'Red_button_timer') {
-    if (settings.red_button) {
-      if (settings.red_button_timer > 0) {
-        settings.red_button_timer--;
-        settings.save()
+  (async() => {
+    await settings.load();
+    if (alarm.name === "Red_button_timer") {
+      if (settings.red_button) {
+        if (settings.red_button_timer > 0) {
+          settings.red_button_timer--;
+          await settings.save();
+          console.log("settings.red_button_timer", settings.red_button_timer);
+        } else {
+          settings.red_button = false;
+          await settings.save();
+        }
       } else {
-        settings.red_button = false;
-        settings.save()
+        chrome.alarms.clear("Red_button_timer");
       }
-      //console.log(settings.red_button_timer);
-    } else {
-      chrome.alarms.clear('Red_button_timer');
     }
-  }
+  })();
 });
+
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   (async () => {

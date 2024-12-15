@@ -258,13 +258,15 @@ class MessageHandler {
     }
   }
   sendRedButton_processing() {
-    //console.log(this.request.num_minut);
+    console.log(this.request.num_minut);
     this.settings.red_button = true;
     this.settings.red_button_timer = this.request.num_minut;
+    
     chrome.alarms.create("Red_button_timer", {
       delayInMinutes: 1, // 1 / 60 - 1 секунда
       periodInMinutes: 1,
     });
+    this.settings.save()
     // Перезагружаем все вкладки
     chrome.tabs.query({}, (tabs) => {
       if (!tabs) {
@@ -304,6 +306,7 @@ class MessageHandler {
     if (text_for_language_detect.split(' ').length < 20){
       language = 'unknown';
     }
+    language = 'unknown';
     logger.log('sendPageText_processing', "Scan complete. Score:", score);
     logger.log('sendPageText_processing', "Scan complete. foundWords:", foundWords);
     logger.log('sendPageText_processing', "Detect language complete. language:", language);

@@ -46,6 +46,7 @@ function blocking_images() {
     }
     remove_for_tag('img');
     remove_for_tag('canvas');
+    remove_for_tag('video');
   }
 
   fun_remove();
