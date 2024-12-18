@@ -91,3 +91,60 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
   })();
 });
+
+const blockedMimeTypes = ['audio/mpeg', 'video/mp4', 'image/jpeg', 'image/png'];
+const blockedExtensions = ['.mp3', '.mp4', '.jpeg', '.png'];
+
+// Храним список ID загрузок, которые уже были обработаны
+const processedDownloads = new Set();
+
+chrome.downloads.onCreated.addListener(function (downloadItem) {
+  console.log("Download created:", downloadItem);
+
+  // Проверяем уже известные данные на момент создания
+  const mimeType = downloadItem.mime || "unknown";
+  const filename = downloadItem.filename ? downloadItem.filename.toLowerCase() : "";
+
+  if (shouldBlockDownload(mimeType, filename)) {
+    cancelDownload(downloadItem.id);
+  }
+});
+
+chrome.downloads.onChanged.addListener(function (delta) {
+  // Проверяем, обновился ли MIME-тип или имя файла
+  if (delta.mime || delta.filename) {
+    chrome.downloads.search({ id: delta.id }, function (results) {
+      if (results && results.length > 0) {
+        const item = results[0];
+        const mimeType = item.mime || "unknown";
+        const filename = item.filename ? item.filename.toLowerCase() : "";
+
+        if (!processedDownloads.has(item.id) && shouldBlockDownload(mimeType, filename)) {
+          cancelDownload(item.id);
+        }
+      }
+    });
+  }
+});
+
+// Функция проверки, нужно ли блокировать загрузку
+function shouldBlockDownload(mimeType, filename) {
+  const isBlockedMime = blockedMimeTypes.includes(mimeType);
+  const isBlockedExtension = blockedExtensions.some((ext) => filename.endsWith(ext));
+  return isBlockedMime || isBlockedExtension;
+}
+
+// Функция отмены загрузки
+function cancelDownload(downloadId) {
+  chrome.downloads.cancel(downloadId, function () {
+    if (chrome.runtime.lastError) {
+      console.error(`Error cancelling download ${downloadId}: ${chrome.runtime.lastError.message}`);
+    } else {
+      console.log(`Download with ID ${downloadId} has been cancelled.`);
+      processedDownloads.add(downloadId); // Помечаем как обработанную
+    }
+  });
+}
+
+
+

@@ -1,7 +1,7 @@
 {
   "blockpage": "www.webpagetest.org|www.webpagetest.org",
   "limit": 160,
-  "whitelist": "stepik.org|netology.ru|github.com|htmlacademy.ru|localhost:*|127.0.0.1:*|chrome://newtab|lmarena.ai|learn.javascript.ru|quickref.me/javascript|developer.mozilla.org|developer.chrome.com|app.todoist.com|calendar.google.com|meet.google.com|docs.google.com|translate.google.com|cloud.ru|openai.com|chatgpt.com|accounts.google.com|gosuslugi.ru|uslugi.admtyumen.ru|anthropic.com|claude.ai|chatgpt.com|lmarena.ai|2gis.ru",
+  "whitelist": "stepik.org|netology.ru|github.com|htmlacademy.ru|localhost:*|127.0.0.1:*|chrome://newtab|lmarena.ai|learn.javascript.ru|quickref.me/javascript|developer.mozilla.org|developer.chrome.com|app.todoist.com|calendar.google.com|meet.google.com|docs.google.com|translate.google.com|cloud.ru|openai.com|chatgpt.com|accounts.google.com|gosuslugi.ru|uslugi.admtyumen.ru|anthropic.com|claude.ai|chatgpt.com|lmarena.ai|2gis.ru|cloud.ru|justhost.ru|my.vdc.ru",
   "blockvals": [
     {
       "name": 2,
